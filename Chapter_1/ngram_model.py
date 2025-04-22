@@ -1,3 +1,4 @@
+import html
 import re
 import argparse
 import requests
@@ -14,8 +15,9 @@ def ensure_nltk_resources():
 def load_corpus(use_nursery):
     if use_nursery:
         url = "https://www.gutenberg.org/files/38562/38562-h/38562-h.htm"
-        html = requests.get(url).text
-        text = re.sub(r"<.*?>", "", re.findall(r"<body.*?>(.*?)</body>", html, re.DOTALL)[0])
+        html_content = requests.get(url).text
+        text = re.sub(r"<.*?>", "", re.findall(r"<body.*?>(.*?)</body>", html_content, re.DOTALL)[0])
+        text = html.unescape(text)
     else:
         from nltk.corpus import gutenberg
         text = gutenberg.raw('shakespeare-hamlet.txt')
