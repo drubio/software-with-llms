@@ -6,7 +6,7 @@ from collections import Counter
 import nltk
 from nltk import word_tokenize
 
-# Explicitly download the required resources upfront
+# ---------- Corpus Loading ----------
 def ensure_nltk_resources():
     nltk.download('punkt')
     nltk.download('punkt_tab')
@@ -24,6 +24,7 @@ def load_corpus(use_nursery):
     
     return word_tokenize(text.lower())
 
+# ---------- Ngram Model ----------
 def build_ngram_model(tokens, n):
     model = {}
     for i in range(len(tokens) - n):
@@ -32,6 +33,7 @@ def build_ngram_model(tokens, n):
         model.setdefault(context, Counter())[next_word] += 1
     return model
 
+# ---------- Prediction ----------
 def predict_next(model, prompt, n):
     tokens = word_tokenize(prompt.lower())
     print(f"[DEBUG] Prompt tokens: {tokens}")
@@ -49,6 +51,7 @@ def predict_next(model, prompt, n):
     print(f"[DEBUG] Candidates: {dict(candidates)}")
     return candidates.most_common(1)[0][0]
 
+# ---------- Main ----------
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("prompt", help="Input prompt to complete")
