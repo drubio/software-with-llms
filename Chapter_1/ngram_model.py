@@ -1,31 +1,25 @@
-import html
-import re
-import argparse
-import requests
+"""
+N-gram based language model implementation.
+"""
+from nltk.tokenize import RegexpTokenizer
 from collections import Counter
-import nltk
-from nltk import word_tokenize
+import argparse
 
-# ---------- Corpus Loading ----------
-def ensure_nltk_resources():
-    nltk.download('punkt')
-    nltk.download('punkt_tab')
-    nltk.download('gutenberg')
+import utils
 
-def load_corpus(use_nursery):
-    if use_nursery:
-        url = "https://www.gutenberg.org/files/38562/38562-h/38562-h.htm"
-        html_content = requests.get(url).text
-        text = re.sub(r"<.*?>", "", re.findall(r"<body.*?>(.*?)</body>", html_content, re.DOTALL)[0])
-        text = html.unescape(text)
-    else:
-        from nltk.corpus import gutenberg
-        text = gutenberg.raw('shakespeare-hamlet.txt')
-    
-    return word_tokenize(text.lower())
 
-# ---------- Ngram Model ----------
+def tokenize_text(text):
+    """
+    Tokenize text into words, filtering out punctuation.
+    Uses NLTK's RegexpTokenizer to only keep word-like tokens.
+    """
+    # Create a tokenizer that only keeps words (no punctuation)
+    tokenizer = RegexpTokenizer(r'\w+')
+    return tokenizer.tokenize(text.lower())
+
+
 def build_ngram_model(tokens, n):
+    """Build n-gram language model from tokens."""
     model = {}
     for i in range(len(tokens) - n):
         context = tuple(tokens[i:i+n-1])
@@ -33,9 +27,10 @@ def build_ngram_model(tokens, n):
         model.setdefault(context, Counter())[next_word] += 1
     return model
 
-# ---------- Prediction ----------
-def predict_next(model, prompt, n):
-    tokens = word_tokenize(prompt.lower())
+
+def predict_next(model, prompt, n, top_k):
+    """Predict next word based on prompt using n-gram model."""
+    tokens = tokenize_text(prompt)
     print(f"[DEBUG] Prompt tokens: {tokens}")
     
     if len(tokens) < n - 1:
@@ -47,25 +42,52 @@ def predict_next(model, prompt, n):
     candidates = model.get(context, {})
     if not candidates:
         return '<unk>'
-        
-    print(f"[DEBUG] Candidates: {dict(candidates)}")
-    return candidates.most_common(1)[0][0]
 
-# ---------- Main ----------
+    # Get top k candidates with their counts
+    top_candidates = candidates.most_common(top_k)
+    
+    # Calculate total frequency for this context to get probabilities
+    total_count = sum(candidates.values())
+    
+    # Return candidates with their counts and probabilities
+    return [(word, count, count/total_count) for word, count in top_candidates]
+
+
 def main():
-    parser = argparse.ArgumentParser()
+    """Entry point when script is run directly."""
+    parser = argparse.ArgumentParser(description="N-gram Language Model")
     parser.add_argument("prompt", help="Input prompt to complete")
     parser.add_argument("--nursery", action="store_true", help="Use nursery rhyme corpus")
     parser.add_argument("--ngram", type=int, default=4, help="Size of n-gram (default=4)")
+    parser.add_argument("--topk", type=int, default=5, help="Number of top predictions to show (defauklt=5)")
     args = parser.parse_args()
-
-    # Download required NLTK resources first
-    ensure_nltk_resources()
     
-    tokens = load_corpus(args.nursery)
+    # Process arguments
+    corpus_type = "nursery" if args.nursery else "shakespeare"
+    
+    # Load corpus
+    corpus_text = utils.load_corpus(corpus_type)
+    
+    # Use improved tokenization approach
+    tokens = tokenize_text(corpus_text)
+    print(f"[INFO] Loaded corpus with {len(tokens)} tokens")
+    
+    # Build model
     model = build_ngram_model(tokens, args.ngram)
-    prediction = predict_next(model, args.prompt, args.ngram)
-    print(f"N-gram Prediction for '{args.prompt}': {prediction}")
+    
+    # Generate prediction
+    prediction = predict_next(model, args.prompt, args.ngram, args.topk)
+
+    # Print context info
+    print(f"\nUsing {args.ngram}-gram model (context window: {args.ngram-1} tokens)")
+    
+    # Print results with frequencies and probabilities
+    if isinstance(prediction, list):
+        print(f"\nTop {args.topk} predictions for '{args.prompt}':")
+        for i, (word, count, prob) in enumerate(prediction, 1):
+            print(f"  {i}. {word} (frequency: {count}, probability: {prob:.4f})")
+    else:
+        print(f"Prediction for '{args.prompt}': {prediction}")
 
 if __name__ == "__main__":
     main()
