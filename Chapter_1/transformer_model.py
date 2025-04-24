@@ -1,64 +1,23 @@
-import html
+"""
+Transformer-based language model implementation.
+"""
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-import argparse, re, os, json, math
-import requests
-from collections import Counter
-from pathlib import Path
-from tqdm import tqdm
+import math
 import numpy as np
+from tqdm import tqdm
+import argparse
+import os
+from pathlib import Path
+import heapq
+
+import utils
 
 # ---------- Configuration ----------
 MODEL_CACHE_DIR = "transformer_models"
-VOCAB_CACHE_DIR = "transformer_vocab"
 
-# ---------- Corpus Loading ----------
-def basic_tokenize(text):
-    # Normalize whitespace (convert multiple spaces, tabs, newlines to 1 space)
-    text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r"[^a-zA-Z0-9\s']", " ", text)
-    return text.lower().split()
 
-def load_corpus(use_nursery):
-    if use_nursery:
-        print("[INFO] Loading nursery rhyme corpus...")
-        url = "https://www.gutenberg.org/files/38562/38562-h/38562-h.htm"
-        html_content = requests.get(url).text
-        body = re.findall(r"<body.*?>(.*?)</body>", html_content, re.DOTALL)[0]
-        text = re.sub(r"<.*?>", "", body)
-        text = html.unescape(text)                
-    else:
-        print("[INFO] Loading Tiny Shakespeare corpus...")
-        url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-        text = requests.get(url).text
-    return basic_tokenize(text)
-
-# ---------- Vocab & Encoding ----------
-def build_vocab(tokens, min_freq=2):
-    # Use Counter to count word frequencies
-    word_counts = Counter(tokens)
-    
-    # Filter words by frequency
-    filtered_words = [word for word, count in word_counts.items() if count >= min_freq]
-    
-    # Create vocabulary with indices starting from 1 (0 reserved for padding)
-    vocab = {word: i + 1 for i, word in enumerate(sorted(filtered_words))}
-    
-    # Add special tokens
-    vocab['<pad>'] = 0  # Padding token
-    vocab['<unk>'] = len(vocab)  # Unknown token
-    vocab['<cls>'] = len(vocab)  # Classification token (used for next token prediction)
-    vocab['<sep>'] = len(vocab)  # Separator token
-    
-    print(f"[INFO] Built vocabulary with {len(vocab)} words")
-    return vocab
-
-def encode(tokens, vocab):
-    # Encode tokens using vocabulary, with unknown token handling
-    return [vocab.get(token, vocab['<unk>']) for token in tokens]
-
-# ---------- Dataset ----------
 class TransformerDataset(Dataset):
     def __init__(self, data, context=8):
         self.data = data
@@ -75,7 +34,7 @@ class TransformerDataset(Dataset):
         
         return torch.tensor(input_seq), torch.tensor(target)
 
-# ---------- Positional Encoding ----------
+
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super().__init__()
@@ -96,7 +55,7 @@ class PositionalEncoding(nn.Module):
         # Add positional encoding to input embeddings
         return x + self.pe[:, :x.size(1), :]
 
-# ---------- Transformer Model ----------
+
 class TransformerModel(nn.Module):
     def __init__(self, vocab_size, d_model=128, nhead=4, num_layers=2, 
                  dim_feedforward=512, dropout=0.1, max_len=5000):
@@ -152,9 +111,11 @@ class TransformerModel(nn.Module):
         
         return output
 
-# ---------- Training ----------
-def train_model(model, loader, epochs=5):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def train_model(model, loader, epochs=5, device=None):
+    """Train the transformer model."""
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Using device: {device}")
     
     model = model.to(device)
@@ -205,15 +166,116 @@ def train_model(model, loader, epochs=5):
     
     return model
 
-# ---------- Prediction ----------
-def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=1.0, max_words=5):
+
+def predict_next_beam_search(model, vocab, idx_to_word, prompt, context, beam_width=5, temperature=1.0, max_words=5):
+    """Generate text predictions using beam search with the transformer model."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     model.eval()
     
     # Tokenize input prompt
-    tokens = basic_tokenize(prompt)
+    tokens = utils.basic_tokenize(prompt)
+    initial_tokens = tokens.copy()
+    
+    # Initial context
+    if len(tokens) < context:
+        # Pad with zeros if needed
+        context_tokens = tokens.copy()
+        while len(context_tokens) < context:
+            context_tokens.insert(0, '<pad>')
+    else:
+        context_tokens = tokens[-context:]
+    
+    # Initial beam
+    beams = [(0.0, context_tokens, [])]  # (score, context, generated)
+    
+    # Store all predictions for each step
+    all_predictions = []
+    
+    # Generate specified number of words
+    for step in range(max_words):
+        candidates = []
+        step_predictions = []
+        
+        # Process all current beams
+        for score, beam_context, beam_generated in beams:
+            # Convert tokens to tensor
+            input_ids = torch.tensor([
+                [vocab.get(tok, vocab['<unk>']) for tok in beam_context]
+            ], dtype=torch.long).to(device)
+            
+            # Generate prediction
+            with torch.no_grad():
+                output = model(input_ids)
+                
+                # Apply temperature scaling
+                if temperature > 0:
+                    scaled_logits = output / temperature
+                    probs = torch.softmax(scaled_logits, dim=-1).squeeze()
+                else:
+                    # For temperature=0, just use the logits directly
+                    probs = torch.zeros_like(output).squeeze()
+                    probs[output.argmax()] = 1.0
+                
+                # Get top-k candidates for this beam
+                topk_probs, topk_indices = torch.topk(probs, beam_width)
+                
+                # Store predictions for the first beam in each step
+                if len(beam_generated) == step:
+                    for idx, prob in zip(topk_indices.tolist(), topk_probs.tolist()):
+                        next_word = idx_to_word.get(idx, '<unk>')
+                        step_predictions.append((next_word, prob))
+                
+                for i, (prob, idx) in enumerate(zip(topk_probs.tolist(), topk_indices.tolist())):
+                    # Convert index to word
+                    next_word = idx_to_word.get(idx, '<unk>')
+                    
+                    # Calculate new score: log probability
+                    # We use log probabilities to avoid underflow with small numbers
+                    new_score = score + math.log(prob + 1e-10)  # Add small epsilon to avoid log(0)
+                    
+                    # Create new context by shifting window
+                    new_context = beam_context[1:] + [next_word]
+                    
+                    # Add to current generated sequence
+                    new_generated = beam_generated + [next_word]
+                    
+                    # Add to candidates
+                    candidates.append((new_score, new_context, new_generated))
+        
+        # Keep only the top beam_width candidates
+        beams = heapq.nlargest(beam_width, candidates, key=lambda x: x[0])
+        
+        # Add predictions for this step
+        all_predictions.append(step_predictions)
+    
+    # Return the best beam's generated text and all predictions
+    best_beam = max(beams, key=lambda x: x[0])
+    generated_text = " ".join(best_beam[2])
+    
+    return generated_text, all_predictions, beams
+
+
+def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=1.0, max_words=5, beam_width=0):
+    """Generate text predictions using the transformer model."""
+    # If beam search is enabled, use beam search generation
+    if beam_width > 0:
+        return predict_next_beam_search(
+            model, vocab, idx_to_word, prompt, context, 
+            beam_width=beam_width, temperature=temperature, max_words=max_words
+        )
+    
+    # Otherwise, use regular greedy/sampling generation
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    model.eval()
+    
+    # Tokenize input prompt
+    tokens = utils.basic_tokenize(prompt)
     generated = tokens.copy()
+    
+    # Store predictions for each step
+    all_predictions = []
 
     # Generate specified number of words
     for _ in range(max_words):
@@ -265,34 +327,33 @@ def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperatur
             # Convert indices to words
             options = [(idx_to_word.get(i, '<unk>'), p) 
                       for i, p in zip(top_indices, top_probs)]
-
-        # Print top predictions
-        print("[DEBUG] Top predictions:")
-        for word, prob in options:
-            print(f"  {word}: {prob:.4f}")
+            
+            # Store predictions for this step
+            all_predictions.append(options)
 
         # Add the next token to generated text
         next_word = idx_to_word.get(next_token_id, '<unk>')
         generated.append(next_word)
 
-    # Return everything after the original prompt
-    return " ".join(generated[len(tokens):])
+    # Return everything after the original prompt and all predictions
+    return " ".join(generated[len(tokens):]), all_predictions
 
-# ---------- File Management ----------
-def get_cache_paths(args):
+
+def get_cache_paths(corpus_type, context_size):
+    """Generate appropriate cache paths for model files."""
     # Create necessary directories
+    os.makedirs(utils.VOCAB_CACHE_DIR, exist_ok=True)
     os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
-    os.makedirs(VOCAB_CACHE_DIR, exist_ok=True)
     
-    # Generate filenames
-    corpus_type = "nursery" if args.nursery else "shakespeare"
-    vocab_file = Path(VOCAB_CACHE_DIR) / f"vocab_{corpus_type}_ctx{args.context}.json"
-    model_file = Path(MODEL_CACHE_DIR) / f"model_{corpus_type}_ctx{args.context}.pt"
+    # Generate filenames with clear suffixes
+    vocab_file = Path(utils.VOCAB_CACHE_DIR) / f"vocab_{corpus_type}_ctx{context_size}.json"
+    model_file = Path(MODEL_CACHE_DIR) / f"model_{corpus_type}_ctx{context_size}.pt"
     
     return vocab_file, model_file
 
-# ---------- Main ----------
+
 def main():
+    """Entry point when script is run directly."""
     parser = argparse.ArgumentParser(description="Transformer Language Model")
     parser.add_argument("prompt", help="Input prompt to complete")
     parser.add_argument("--nursery", action="store_true", help="Use nursery rhyme corpus")
@@ -302,41 +363,42 @@ def main():
     parser.add_argument("--maxwords", type=int, default=5, help="Max number of predicted words")
     parser.add_argument("--batch_size", type=int, default=64, help="Training batch size")
     parser.add_argument("--epochs", type=int, default=5, help="Training epochs")
+    parser.add_argument("--beam", type=int, default=0, help="Beam search width (0 disables beam search)")
     parser.add_argument("--force_train", action="store_true", help="Force retraining even if model exists")
     parser.add_argument("--d_model", type=int, default=128, help="Model dimension")
     parser.add_argument("--nhead", type=int, default=4, help="Number of attention heads")
     parser.add_argument("--num_layers", type=int, default=2, help="Number of transformer layers")
     args = parser.parse_args()
 
-    # Get appropriate cache paths based on arguments
-    vocab_file, model_file = get_cache_paths(args)
-
-    # Load the corpus
-    tokens = load_corpus(args.nursery)
+    # Process arguments
+    corpus_type = "nursery" if args.nursery else "shakespeare"
+    
+    # Load corpus and tokenize
+    corpus_text = utils.load_corpus(corpus_type)
+    tokens = utils.basic_tokenize(corpus_text)
     print(f"[INFO] Loaded corpus with {len(tokens)} tokens")
-
+    
+    # Get cache paths for model and vocabulary
+    vocab_file, model_file = get_cache_paths(corpus_type, args.context)
+    
     # Build or load vocabulary
     if vocab_file.exists() and not args.force_train:
-        with open(vocab_file, "r") as f:
-            vocab_data = json.load(f)
-            vocab = {k: int(v) for k, v in vocab_data.items()}
-        print(f"[INFO] Loaded vocabulary from {vocab_file}")
+        vocab = utils.load_vocab(vocab_file)
     else:
-        vocab = build_vocab(tokens, min_freq=2)
-        with open(vocab_file, "w") as f:
-            json.dump(vocab, f)
-        print(f"[INFO] Saved vocabulary to {vocab_file}")
+        special_tokens = ['<pad>', '<unk>', '<cls>', '<sep>']
+        vocab = utils.build_vocab(tokens, min_freq=2, special_tokens=special_tokens)
+        utils.save_vocab(vocab, vocab_file)
 
     # Create mapping from indices to words
     idx_to_word = {i: w for w, i in vocab.items()}
     
     # Encode the entire corpus
-    encoded = encode(tokens, vocab)
-
+    encoded = utils.encode(tokens, vocab)
+    
     # Create dataset and dataloader
     dataset = TransformerDataset(encoded, context=args.context)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
-
+    
     # Create model
     model = TransformerModel(
         vocab_size=len(vocab),
@@ -363,15 +425,70 @@ def main():
         print(f"[INFO] Saved model to {model_file}")
 
     # Generate prediction
-    prediction = predict_next(
-        model, vocab, idx_to_word,
-        args.prompt,
-        context=args.context,
-        top_k=args.topk,
-        temperature=args.temperature,
-        max_words=args.maxwords
-    )
-    print(f"Transformer Prediction for '{args.prompt}': {prediction}")
+    if args.beam > 0:
+        prediction, all_predictions, beams = predict_next(
+            model, vocab, idx_to_word,
+            args.prompt,
+            context=args.context,
+            top_k=args.topk,
+            temperature=args.temperature,
+            max_words=args.maxwords,
+            beam_width=args.beam
+        )
+        
+        # Print context info
+        print(f"\nUsing Transformer model with context window size: {args.context} tokens")
+        print(f"Beam search width: {args.beam}")
+        
+        # Print the complete prediction first
+        print(f"\nTransformer Complete Prediction for '{args.prompt}': {prediction}")
+        
+        # Print predictions for each step
+        for i, predictions in enumerate(all_predictions):
+            step_prompt = args.prompt
+            
+            print(f"\nStep {i+1}: Top {len(predictions)} predictions:")
+            for j, (word, prob) in enumerate(predictions, 1):
+                print(f"  {j}. {word} (probability: {prob:.4f})")
+        
+        # Print final beam results
+        print("\nFinal beam search results:")
+        for i, (score, _, generated) in enumerate(sorted(beams, key=lambda x: x[0], reverse=True)[:args.topk]):
+            print(f"  {i+1}. '{' '.join(generated)}' (score: {score:.4f})")
+            
+    else:
+        prediction, all_predictions = predict_next(
+            model, vocab, idx_to_word,
+            args.prompt,
+            context=args.context,
+            top_k=args.topk,
+            temperature=args.temperature,
+            max_words=args.maxwords,
+            beam_width=args.beam
+        )
+        
+        # Print context info
+        print(f"\nUsing Transformer model with context window size: {args.context} tokens")
+        
+        # Print the complete prediction first
+        generated_words = prediction.split()
+        print(f"\nTransformer Complete Prediction for '{args.prompt}': {prediction}")
+        
+        # Print predictions for each word
+        for i, predictions in enumerate(all_predictions):
+            current_word = generated_words[i] if i < len(generated_words) else "?"
+            
+            # Get the updated prompt for this step
+            if i == 0:
+                step_prompt = args.prompt
+            else:
+                step_prompt = f"{args.prompt} {' '.join(generated_words[:i])}"
+                
+            print(f"\nStep {i+1}: Top {len(predictions)} predictions for '{step_prompt}':")
+            for j, (word, prob) in enumerate(predictions, 1):
+                marker = "→" if word == current_word else " "
+                print(f"  {marker} {j}. {word} (probability: {prob:.4f})")
+
 
 if __name__ == "__main__":
     main()

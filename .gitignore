@@ -1,3 +1,7 @@
+# Project cache folders
+*_cache/
+*_models/
+*_vocab/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
