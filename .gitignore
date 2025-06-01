@@ -176,3 +176,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Node
+node_modules
+package-lock.json
+
+# Emacs ~ files
+*~
