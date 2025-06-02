@@ -300,7 +300,7 @@ const LlamaIndexPage = () => {
   const { providers, settings, setSettings } = useAPISettings();
 
   const chat = useChat({
-    api: '/api/llamaindex-chat',
+    api: '/api/llamaindex-agent',
     body: {
       queryMode: settings.queryMode,
       selectedProvider: settings.selectedProvider,
