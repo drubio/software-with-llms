@@ -8,7 +8,7 @@ This three-part series offers a structured, hands-on approach to building real-w
 
 ## 📘 Volumes
 
-### Volume 1: [Start Building with LLMs – Fundamentals, APIs, and UIs](https://www.amazon.com/dp/B0F5WXXM59)
+### [Start Building with LLMs – Fundamentals, APIs, and UIs](https://www.amazon.com/dp/B0F5WXXM59) _(Volume 1)_
 
 Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, Anthropic, Google, xAI). Includes building a complete app using:
 
