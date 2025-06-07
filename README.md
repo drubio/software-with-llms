@@ -17,7 +17,7 @@ Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, 
 - Assistant UI components and vanilla React
 
 
-### Volume 2 – System Architecture & Multi-Agent Workflows _(coming soon)_
+### Volume 2 – Scale LLM Systems – Agents, Routing, and Infrastructure _(coming soon)_
 
 Explores:
 
@@ -25,7 +25,7 @@ Explores:
 - Managing model infrastructure with LiteLLM and OpenRouter
 - Designing scalable, fault-tolerant systems with context and robustness in mind
 
-### Volume 3 – Real-Time Interfaces & Context-Aware Systems _(coming soon)_
+### Volume 3 – Advanced LLM Applications – RAG, Personalization, and MCP _(coming soon)_
 
 Focuses on:
 
