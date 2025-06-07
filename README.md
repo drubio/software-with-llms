@@ -12,9 +12,10 @@ This three-part series offers a structured, hands-on approach to building real-w
 
 Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, Anthropic, Google, xAI). Includes building a complete app using:
 
-- LangChain and LlamaIndex for basic chaining and indexing
-- Assistant UI components and vanilla React
 - Step-by-step examples for developers new to LLMs
+- LangChain and LlamaIndex for basic chats with LLMs
+- Assistant UI components and vanilla React
+
 
 ### Volume 2 – System Architecture & Multi-Agent Workflows _(coming soon)_
 
