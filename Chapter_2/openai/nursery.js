@@ -7,6 +7,7 @@ const client = new OpenAI({
 
 const response = await client.chat.completions.create({
   model: "gpt-4",
+  max_completion_tokens: 100,
   messages: [{ role: "user", content: "Twinkle, Twinkle, Little" }],
 });
 
