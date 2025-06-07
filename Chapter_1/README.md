@@ -6,7 +6,7 @@ This chapter provides three different implementations of language models to comp
 - **LSTM Model** (`lstm_model.py`)
 - **Transformer Model** (`transformer_model.py`)
 
-All models by default run on a Shakespeare corpus or can also use a nursery rhyme corpus (with the --nursery flag), to generate word predictions based on a given prompt.
+By default all models run on a Shakespeare corpus or can also use a nursery rhyme corpus (using the `--nursery` flag), to generate word predictions based on a given prompt.
 
 ## Setup
 
@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-All scripts are command-line runnable and use default values for every parameter. Run the script with --help to see all the available parameters that can be overriden with flags
+All scripts are command-line runnable and use default values for every parameter. Run the script with `--help` to see all the available parameters that can be overriden with flags
 
 Below are example commands for each:
 
