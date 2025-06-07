@@ -6,20 +6,31 @@ import re
 import os
 import json
 import requests
+import unicodedata
 from collections import Counter
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 # Configuration
 CACHE_DIR = "model_cache"
 CORPUS_CACHE_DIR = "corpus_cache"
 VOCAB_CACHE_DIR = "vocab_cache"
 
-# Text processing
+# Unified Text Processing
 def basic_tokenize(text):
-    """Normalize and tokenize text into words."""
+    text = unicodedata.normalize("NFKC", text)
+    text = text.lower()
+    text = text.replace('-', ' ')
+    text = re.sub(r"[^\w\s']", '', text)
     text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r"[^a-zA-Z0-9\s']", " ", text)
-    return text.lower().split()
+    tokens = text.strip().split()
+    cleaned_tokens = []
+    for token in tokens:
+        token = unicodedata.normalize("NFKC", token).strip()
+        if re.match(r'^[a-z]+\d+$', token):
+            token = re.sub(r'\d+$', '', token)
+        cleaned_tokens.append(token)
+    return cleaned_tokens
 
 # Corpus loading
 def load_corpus(corpus_type, use_cache=True):
@@ -40,13 +51,31 @@ def load_corpus(corpus_type, use_cache=True):
     
     try:
         if corpus_type == "nursery":
-            url = "https://www.gutenberg.org/files/38562/38562-h/38562-h.htm"
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            html_content = response.text
-            body = re.findall(r"<body.*?>(.*?)</body>", html_content, re.DOTALL)[0]
-            text = re.sub(r"<.*?>", "", body)
-            text = html.unescape(text)
+            urls = [
+                "https://www.gutenberg.org/files/39784/39784-h/39784-h.htm",
+                "https://www.poetryfoundation.org/poems/43200/twinkle-twinkle-little-star"
+            ]
+            full_text = ""
+            for url in urls:
+                print(f"[INFO] Fetching: {url}")
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.text, "html.parser")
+                text = soup.get_text(separator=' ', strip=True)
+                start = text.find("Mother Goose")
+                end = text.find("End of the Project Gutenberg")
+                if start != -1 and end != -1:
+                    text = text[start:end]
+                lines = text.splitlines()
+                cleaned_lines = [
+                    line for line in lines
+                    if 'project gutenberg' not in line.lower()
+                    and 'musicxml' not in line.lower()
+                    and 'http' not in line.lower()
+                    and len(line.strip()) > 0
+                ]
+                full_text += ' ' + ' '.join(cleaned_lines)
+            text = full_text.strip()
         elif corpus_type == "shakespeare":
             url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
             response = requests.get(url, timeout=30)
@@ -73,32 +102,28 @@ def load_corpus(corpus_type, use_cache=True):
 def build_vocab(tokens, min_freq=2, special_tokens=None):
     """Build vocabulary from tokens with optional special tokens."""
     if special_tokens is None:
-        special_tokens = ['<pad>', '<unk>']
-    
+        special_tokens = ['<pad>', '<unk>', '<bos>']
+
     # Count word frequencies
     word_counts = Counter(tokens)
-    
-    # Filter by frequency
-    filtered_words = [word for word, count in word_counts.items() if count >= min_freq]
-    
-    # Create vocabulary (starting from 1, 0 reserved for padding)
-    vocab = {word: i + 1 for i, word in enumerate(sorted(filtered_words))}
-    
-    # Add special tokens
-    next_idx = len(vocab) + 1  # +1 because we started indexing at 1
+    vocab = {}
+    idx = 1
+    vocab['<pad>'] = 0
+    for word, count in word_counts.items():
+        if count >= min_freq and word not in vocab:
+            vocab[word] = idx
+            idx += 1
     for token in special_tokens:
-        if token == '<pad>':
-            vocab[token] = 0  # Padding is always 0
-        else:
-            vocab[token] = next_idx
-            next_idx += 1
-    
+        if token not in vocab:
+            vocab[token] = idx
+            idx += 1
+
     print(f"[INFO] Built vocabulary with {len(vocab)} words")
     return vocab
 
 def encode(tokens, vocab):
     """Encode tokens using vocabulary, with unknown token handling."""
-    return [vocab.get(token, vocab['<unk>']) for token in tokens]
+    return [vocab.get(token, vocab.get('<unk>', 0)) for token in tokens]
 
 def save_vocab(vocab, vocab_file):
     """Save vocabulary to file."""

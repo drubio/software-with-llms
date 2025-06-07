@@ -1,7 +1,6 @@
 """
 N-gram based language model implementation.
 """
-from nltk.tokenize import RegexpTokenizer
 from collections import Counter
 import argparse
 
@@ -9,14 +8,8 @@ import utils
 
 
 def tokenize_text(text):
-    """
-    Tokenize text into words, filtering out punctuation.
-    Uses NLTK's RegexpTokenizer to only keep word-like tokens.
-    """
-    # Create a tokenizer that only keeps words (no punctuation)
-    tokenizer = RegexpTokenizer(r'\w+')
-    return tokenizer.tokenize(text.lower())
-
+    from utils import basic_tokenize
+    return basic_tokenize(text)
 
 def build_ngram_model(tokens, n):
     """Build n-gram language model from tokens."""

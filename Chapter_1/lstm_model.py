@@ -38,8 +38,8 @@ class LSTMModel(nn.Module):
 
     def forward(self, x):
         x = self.embedding(x)
-        _, (h_n, _) = self.lstm(x)
-        return self.linear(h_n[-1])
+        out, _ = self.lstm(x)
+        return self.linear(out[:, -1, :])
 
 
 def train_model(model, loader, epochs=5, device=None):
@@ -158,12 +158,12 @@ def main():
     parser = argparse.ArgumentParser(description="LSTM Language Model")
     parser.add_argument("prompt", help="Input prompt to complete")
     parser.add_argument("--nursery", action="store_true", help="Use nursery rhyme corpus")
-    parser.add_argument("--context", type=int, default=3, help="Context window size")
+    parser.add_argument("--context", type=int, default=15, help="Context window size")
     parser.add_argument("--topk", type=int, default=5, help="Show top-k predictions")
     parser.add_argument("--temperature", type=float, default=1.0, help="Sampling temperature")
-    parser.add_argument("--maxwords", type=int, default=1, help="Max number of predicted words")
+    parser.add_argument("--maxwords", type=int, default=5, help="Max number of predicted words")
     parser.add_argument("--batch_size", type=int, default=32, help="Training batch size")
-    parser.add_argument("--epochs", type=int, default=5, help="Training epochs")
+    parser.add_argument("--epochs", type=int, default=10, help="Training epochs")
     parser.add_argument("--force_train", action="store_true", help="Force retraining even if model exists")
     args = parser.parse_args()
 
@@ -182,6 +182,7 @@ def main():
     if vocab_file.exists() and not args.force_train:
         vocab = utils.load_vocab(vocab_file)
     else:
+        tokens = ['<bos>'] + tokens
         vocab = utils.build_vocab(tokens, min_freq=2)
         utils.save_vocab(vocab, vocab_file)
 
@@ -197,7 +198,7 @@ def main():
     
     # Create model
     model = LSTMModel(vocab_size=len(vocab))
-    
+
     # Load or train the model
     if model_file.exists() and not args.force_train:
         try:
