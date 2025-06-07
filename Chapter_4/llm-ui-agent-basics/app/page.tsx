@@ -23,6 +23,7 @@ import {
 // Custom hook for API settings and providers
 const useAPISettings = () => {
   const [providers, setProviders] = useState([]);
+  const [apiStatus, setApiStatus] = useState('checking'); // 'online', 'offline', 'checking'
   const [settings, setSettings] = useState({
     queryMode: 'single',
     selectedProvider: '',
@@ -30,19 +31,38 @@ const useAPISettings = () => {
     maxTokens: 1000
   });
 
-  useEffect(() => {
-    fetch('http://localhost:8000/providers')
-      .then(res => res.json())
-      .then(data => {
+  const checkApiStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/providers', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
         setProviders(data.providers || []);
+        setApiStatus('online');
         if (data.providers?.length > 0) {
           setSettings(prev => ({ ...prev, selectedProvider: data.providers[0].name }));
         }
-      })
-      .catch(() => setProviders([]));
+      } else {
+        setApiStatus('offline');
+      }
+    } catch (error) {
+      setProviders([]);
+      setApiStatus('offline');
+    }
+  };
+
+  useEffect(() => {
+    checkApiStatus();
+    
+    // Check API status every 30 seconds
+    const interval = setInterval(checkApiStatus, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  return { providers, settings, setSettings };
+  return { providers, settings, setSettings, apiStatus, checkApiStatus };
 };
 
 // Shared API call logic
@@ -79,8 +99,44 @@ const callAPI = async (message, settings) => {
   }
 };
 
+// API Status Indicator Component
+const ApiStatusIndicator = ({ status, onRefresh }) => {
+  const getStatusColor = () => {
+    switch (status) {
+      case 'online': return 'bg-green-500';
+      case 'offline': return 'bg-red-500';
+      case 'checking': return 'bg-yellow-500 animate-pulse';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (status) {
+      case 'online': return 'API Online';
+      case 'offline': return 'API Offline';
+      case 'checking': return 'Checking...';
+      default: return 'Unknown';
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between p-3 bg-gray-50 border-b">
+      <div className="flex items-center space-x-2">
+        <div className={`w-3 h-3 rounded-full ${getStatusColor()}`}></div>
+        <span className="text-sm font-medium">{getStatusText()}</span>
+      </div>
+      <button
+        onClick={onRefresh}
+        className="text-xs text-gray-600 hover:text-gray-800 underline"
+      >
+        Refresh
+      </button>
+    </div>
+  );
+};
+
 // Shared Settings Sidebar Component
-const SettingsSidebar = ({ isOpen, onClose, settings, onSettingsChange, providers }) => (
+const SettingsSidebar = ({ isOpen, onClose, settings, onSettingsChange, providers, apiStatus, onRefreshApi }) => (
   <div className={`fixed right-0 top-0 h-full w-80 bg-white border-l shadow-xl transform transition-transform z-50 ${
     isOpen ? 'translate-x-0' : 'translate-x-full'
   }`}>
@@ -90,6 +146,9 @@ const SettingsSidebar = ({ isOpen, onClose, settings, onSettingsChange, provider
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
       </div>
     </div>
+    
+    <ApiStatusIndicator status={apiStatus} onRefresh={onRefreshApi} />
+    
     <div className="p-4 space-y-4 overflow-y-auto">
       <div>
         <label className="block text-sm font-medium mb-2">Query Mode</label>
@@ -124,6 +183,7 @@ const SettingsSidebar = ({ isOpen, onClose, settings, onSettingsChange, provider
             value={settings.selectedProvider}
             onChange={(e) => onSettingsChange({ ...settings, selectedProvider: e.target.value })}
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            disabled={apiStatus !== 'online'}
           >
             {providers.map(p => (
               <option key={p.name} value={p.name}>{p.display_name}</option>
@@ -170,12 +230,24 @@ const SettingsSidebar = ({ isOpen, onClose, settings, onSettingsChange, provider
 );
 
 // Shared Header Component
-const FrameworkHeader = ({ title, color, settings, onSettingsClick }) => (
+const FrameworkHeader = ({ title, color, settings, onSettingsClick, apiStatus }) => (
   <div className={`bg-${color}-600 text-white p-3 flex justify-between items-center`}>
-    <div>
-      <h1 className="text-lg font-semibold">{title}</h1>
-      <div className="text-xs opacity-75">
-        Mode: {settings.queryMode} | Provider: {settings.selectedProvider} | Temp: {settings.temperature} | Max Tokens: {settings.maxTokens}
+    <div className="flex items-center space-x-3">
+      <div>
+        <h1 className="text-lg font-semibold">{title}</h1>
+        <div className="text-xs opacity-75">
+          Mode: {settings.queryMode} | Provider: {settings.selectedProvider} | Temp: {settings.temperature} | Max Tokens: {settings.maxTokens}
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className={`w-2 h-2 rounded-full ${
+          apiStatus === 'online' ? 'bg-green-400' : 
+          apiStatus === 'offline' ? 'bg-red-400' : 
+          'bg-yellow-400 animate-pulse'
+        }`}></div>
+        <span className="text-xs opacity-75">
+          {apiStatus === 'online' ? 'Online' : apiStatus === 'offline' ? 'Offline' : 'Checking'}
+        </span>
       </div>
     </div>
     <button 
@@ -194,7 +266,7 @@ const FrameworkHeader = ({ title, color, settings, onSettingsClick }) => (
 // LangChain Component
 const LangChainPage = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const { providers, settings, setSettings } = useAPISettings();
+  const { providers, settings, setSettings, apiStatus, checkApiStatus } = useAPISettings();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hello! I\'m your LangChain assistant connected to your API.' }
@@ -227,6 +299,7 @@ const LangChainPage = () => {
         color="blue"
         settings={settings}
         onSettingsClick={() => setShowSettings(!showSettings)}
+        apiStatus={apiStatus}
       />
       
       <div className="flex-1 overflow-hidden p-4">
@@ -285,6 +358,8 @@ const LangChainPage = () => {
         settings={settings}
         onSettingsChange={setSettings}
         providers={providers}
+        apiStatus={apiStatus}
+        onRefreshApi={checkApiStatus}
       />
 
       {showSettings && (
@@ -297,7 +372,7 @@ const LangChainPage = () => {
 // LlamaIndex Component
 const LlamaIndexPage = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const { providers, settings, setSettings } = useAPISettings();
+  const { providers, settings, setSettings, apiStatus, checkApiStatus } = useAPISettings();
 
   const chat = useChat({
     api: '/api/llamaindex-agent',
@@ -308,7 +383,10 @@ const LlamaIndexPage = () => {
       maxTokens: settings.maxTokens,
       template: '{topic}'
     },
-    onError: (error) => console.error('LlamaIndex chat error:', error)
+    onError: (error) => console.error('LlamaIndex chat error:', error),
+    initialMessages: [
+      { role: 'assistant', content: 'Hello! I\'m your LlamaIndex assistant connected to your API.' }
+    ]
   });
 
   return (
@@ -318,29 +396,32 @@ const LlamaIndexPage = () => {
         color="purple"
         settings={settings}
         onSettingsClick={() => setShowSettings(!showSettings)}
+        apiStatus={apiStatus}
       />
       
-      <div className="flex-1 overflow-hidden">
-        <ChatSection handler={chat} className="h-full">
-          <ChatMessages className="flex-1 overflow-y-auto" />
-          <ChatInput className="border-t">
-            <ChatInput.Form className="p-4">
-              <ChatInput.Field 
-                type="textarea" 
-                placeholder={`Ask questions... (${settings.queryMode === 'single' ? settings.selectedProvider : 'all providers'})`}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-              <div className="flex justify-between items-center mt-2">
-                <ChatInput.Submit className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg ml-2">
-                  Send
-                </ChatInput.Submit>
-              </div>
-            </ChatInput.Form>
-	      <div className="text-xs text-gray-500">
-                  Powered by @llamaindex/chat-ui • {settings.queryMode === 'single' ? `Using ${settings.selectedProvider}` : 'Using all providers'}
-              </div>	    
-          </ChatInput>
-        </ChatSection>
+      <div className="flex-1 overflow-hidden p-4">
+        <div className="h-full bg-white rounded-lg border overflow-hidden flex flex-col">
+          <ChatSection handler={chat} className="h-full flex flex-col">
+            <ChatMessages className="flex-1 overflow-y-auto p-4" />
+            <ChatInput className="border-t">
+              <ChatInput.Form className="p-4">
+                <ChatInput.Field 
+                  type="textarea" 
+                  placeholder={`Ask questions... (${settings.queryMode === 'single' ? settings.selectedProvider : 'all providers'})`}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <div className="text-xs text-gray-500">
+                    Powered by @llamaindex/chat-ui • {settings.queryMode === 'single' ? `Using ${settings.selectedProvider}` : 'Using all providers'}
+                  </div>
+                  <ChatInput.Submit className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg ml-2">
+                    Send
+                  </ChatInput.Submit>
+                </div>
+              </ChatInput.Form>
+            </ChatInput>
+          </ChatSection>
+        </div>
       </div>
 
       <SettingsSidebar
@@ -349,6 +430,8 @@ const LlamaIndexPage = () => {
         settings={settings}
         onSettingsChange={setSettings}
         providers={providers}
+        apiStatus={apiStatus}
+        onRefreshApi={checkApiStatus}
       />
 
       {showSettings && (
@@ -361,7 +444,7 @@ const LlamaIndexPage = () => {
 // Assistant UI Component
 const AssistantUIPage = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const { providers, settings, setSettings } = useAPISettings();
+  const { providers, settings, setSettings, apiStatus, checkApiStatus } = useAPISettings();
 
   // Assistant UI adapter for your API
   const modelAdapter: ChatModelAdapter = {
@@ -415,7 +498,7 @@ const AssistantUIPage = () => {
           content = data.success ? data.response : `Error: ${data.error}`;
         } else {
           if (data.success) {
-            content = `🤖 Assistant UI Results from ${data.summary.total_providers} providers:\n\n`;
+            content = `Results from ${data.summary.total_providers} providers:\n\n`;
             for (const [provider, response] of Object.entries(data.responses)) {
               content += `**${provider}**: ${response.success ? response.response : response.error}\n\n`;
             }
@@ -458,55 +541,58 @@ const AssistantUIPage = () => {
         color="green"
         settings={settings}
         onSettingsClick={() => setShowSettings(!showSettings)}
+        apiStatus={apiStatus}
       />
       
-      <div className="flex-1 overflow-hidden">
-        {/* Assistant UI Components */}
-        <AssistantRuntimeProvider runtime={runtime}>
-          <ThreadPrimitive.Root className="h-full bg-gradient-to-b from-green-50 to-white flex flex-col">
-            <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto p-4">
-              <ThreadPrimitive.Empty>
-                <div className="text-center text-gray-500 mt-8">
-                  Hello! I'm your Assistant UI powered by real @assistant-ui/react components.
-                </div>
-              </ThreadPrimitive.Empty>
-              <ThreadPrimitive.Messages 
-                components={{
-                  UserMessage: ({ children }) => (
-                    <div className="mb-4 text-right">
-                      <div className="bg-green-600 text-white px-4 py-2 rounded-lg inline-block max-w-md">
-                        <MessagePrimitive.Content />
+      <div className="flex-1 overflow-hidden p-4">
+        <div className="h-full bg-white rounded-lg border overflow-hidden flex flex-col">
+          {/* Assistant UI Components */}
+          <AssistantRuntimeProvider runtime={runtime}>
+            <ThreadPrimitive.Root className="h-full bg-gradient-to-b from-green-50 to-white flex flex-col">
+              <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto p-4">
+                <ThreadPrimitive.Empty>
+                  <div className="text-center text-gray-500 mt-8">
+                    Hello! I'm your Assistant UI connected to your API.
+                  </div>
+                </ThreadPrimitive.Empty>
+                <ThreadPrimitive.Messages 
+                  components={{
+                    UserMessage: ({ children }) => (
+                      <div className="mb-4 text-right">
+                        <div className="bg-green-600 text-white px-4 py-2 rounded-lg inline-block max-w-md">
+                          <MessagePrimitive.Content />
+                        </div>
                       </div>
-                    </div>
-                  ),
-                  AssistantMessage: ({ children }) => (
-                    <div className="mb-4 text-left">
-                      <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg inline-block max-w-md whitespace-pre-wrap">
-                        <MessagePrimitive.Content />
+                    ),
+                    AssistantMessage: ({ children }) => (
+                      <div className="mb-4 text-left">
+                        <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg inline-block max-w-md whitespace-pre-wrap">
+                          <MessagePrimitive.Content />
+                        </div>
                       </div>
-                    </div>
-                  )
-                }}
-              />
-            </ThreadPrimitive.Viewport>
-            <div className="border-t p-4">
-              <ComposerPrimitive.Root>
-                <div className="flex space-x-2">
-                  <ComposerPrimitive.Input 
-                    placeholder={`Ask questions... (${settings.queryMode === 'single' ? settings.selectedProvider : 'all providers'})`}
-                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500"
-                  />
-                  <ComposerPrimitive.Send className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg">
-                    Send
-                  </ComposerPrimitive.Send>
-                </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  Powered by @assistant-ui/react • Real streaming conversations
-                </div>
-              </ComposerPrimitive.Root>
-            </div>
-          </ThreadPrimitive.Root>
-        </AssistantRuntimeProvider>
+                    )
+                  }}
+                />
+              </ThreadPrimitive.Viewport>
+              <div className="border-t p-4">
+                <ComposerPrimitive.Root>
+                  <div className="flex space-x-2">
+                    <ComposerPrimitive.Input 
+                      placeholder={`Ask questions... (${settings.queryMode === 'single' ? settings.selectedProvider : 'all providers'})`}
+                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    />
+                    <ComposerPrimitive.Send className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg">
+                      Send
+                    </ComposerPrimitive.Send>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Powered by @assistant-ui/react • Real streaming conversations
+                  </div>
+                </ComposerPrimitive.Root>
+              </div>
+            </ThreadPrimitive.Root>
+          </AssistantRuntimeProvider>
+        </div>
       </div>
 
       <SettingsSidebar
@@ -515,6 +601,8 @@ const AssistantUIPage = () => {
         settings={settings}
         onSettingsChange={setSettings}
         providers={providers}
+        apiStatus={apiStatus}
+        onRefreshApi={checkApiStatus}
       />
 
       {showSettings && (
@@ -527,10 +615,10 @@ const AssistantUIPage = () => {
 // Custom Chat Component (vanilla React implementation)
 const CustomChatPage = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const { providers, settings, setSettings } = useAPISettings();
+  const { providers, settings, setSettings, apiStatus, checkApiStatus } = useAPISettings();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { id: 1, role: 'assistant', content: '💬 Hello! This is a custom chat interface built with vanilla React components.' }
+    { id: 1, role: 'assistant', content: 'Hello! I\'m your custom chat assistant connected to your API.' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -546,7 +634,7 @@ const CustomChatPage = () => {
     try {
       const content = await callAPI(input, settings);
       const formattedContent = settings.queryMode === 'all' 
-        ? content.replace('Results from', '💬 Custom Chat Results from')
+        ? content.replace('Results from', 'Custom Chat Results from')
         : content;
       
       setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: formattedContent }]);
@@ -564,6 +652,7 @@ const CustomChatPage = () => {
         color="orange"
         settings={settings}
         onSettingsClick={() => setShowSettings(!showSettings)}
+        apiStatus={apiStatus}
       />
       
       <div className="flex-1 overflow-hidden p-4">
@@ -587,7 +676,7 @@ const CustomChatPage = () => {
               <div className="text-left mb-4">
                 <div className="inline-block bg-orange-100 px-4 py-2 rounded-lg">
                   <div className="text-xs font-semibold mb-1 text-orange-700">Custom Assistant</div>
-                  <div className="animate-pulse">💬 Processing your request...</div>
+                  <div className="animate-pulse">Processing your request...</div>
                 </div>
               </div>
             )}
@@ -625,6 +714,8 @@ const CustomChatPage = () => {
         settings={settings}
         onSettingsChange={setSettings}
         providers={providers}
+        apiStatus={apiStatus}
+        onRefreshApi={checkApiStatus}
       />
 
       {showSettings && (
