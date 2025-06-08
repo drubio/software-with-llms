@@ -8,7 +8,7 @@ This three-part series offers a structured, hands-on approach to building real-w
 
 ## 📘 Volumes
 
-### [Start Building with LLMs – Fundamentals, APIs, and UIs](https://www.amazon.com/dp/B0F5WXXM59) _(Volume 1)_
+### [Essential LLM Applications – Fundamentals, APIs, and UIs](https://www.amazon.com/dp/B0F5WXXM59) _(Volume 1)_
 
 Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, Anthropic, Google, xAI). Includes building a complete app using:
 
@@ -17,7 +17,7 @@ Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, 
 - Assistant UI components and vanilla React
 
 
-### Scale LLM Systems – Agents, Routing, and Infrastructure _(Volume 2)_ _(coming soon)_
+### Scale LLM Applications – Agents, Routing, and Infrastructure _(Volume 2)_ _(coming soon)_
 
 Explores:
 
