@@ -1,30 +1,33 @@
 {
-  "name": "llm-ui-agent-basics",
-  "version": "0.1.0",
-  "private": true,
+  "name": "llm-tester-js",
+  "version": "1.0.0",
+  "description": "JavaScript LLM Framework Tester with LangChain support",
+  "type": "module",
+  "main": "llm_tester.js",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "node llm_tester.js",
+    "web": "node llm_tester.js web",
+    "test": "node llm_tester.js"
   },
   "dependencies": {
-    "@assistant-ui/react": "^0.10.19",
-    "@langchain/core": "^0.3.57",
-    "@langchain/langgraph-sdk": "^0.0.79",
-    "@llamaindex/chat-ui": "^0.4.8",
-    "ai": "^4.3.16",
-    "lucide-react": "^0.511.0",
-    "next": "15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@langchain/anthropic": "^0.2.0",
+    "@langchain/openai": "^0.2.0", 
+    "@langchain/google-genai": "^0.0.23",
+    "@langchain/core": "^0.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
   },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+  "keywords": [
+    "llm",
+    "langchain", 
+    "ai",
+    "chatbot",
+    "openai",
+    "anthropic",
+    "google",
+    "testing"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
