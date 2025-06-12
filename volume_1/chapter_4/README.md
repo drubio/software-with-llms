@@ -10,11 +10,11 @@ It can be run in two forms:
 ```
 chapter_4/
 ├── langchain/
-│   ├── llm\_gateway.py
-│   └── llm\_gateway.js
+│   ├── llm_gateway.py
+│   └── llm_gateway.js
 ├── llamaindex/
-│   ├── llm\_gateway.py
-│   └── llm\_gateway.js
+│   ├── llm_gateway.py
+│   └── llm_gateway.js
 ├── utils.py
 ├── utils.js
 ├── web.py
@@ -41,7 +41,7 @@ The following files are **shared** for both Langchain and LlamaIndex implementat
 - `.env` - Environment file with LLM API keys
 
 ## Environment Setup
-Add a `.env` file at the root:
+Update the `.env` file with the LLM API keys:
 
 ```env
 OPENAI_API_KEY=your-openai-key
@@ -55,14 +55,16 @@ XAI_API_KEY=your-xai-key
 Run in either:
 
 * [Command Line Mode]
-### ❯ Example (Python LangChain)
+### ❯ Example (Python)
 ```bash
 python langchain/llm_gateway.py
+python llamaindex/llm_gateway.py
 ```
 
-### ❯ Example (JavaScript LlamaIndex)
+### ❯ Example (JavaScript)
 
 ```bash
+node langchain/llm_gateway.js
 node llamaindex/llm_gateway.js
 ```
 
@@ -84,22 +86,24 @@ Artificial general intelligence (AGI) refers to...
 === Anthropic Claude (LangChain) answered:
 [temp: 0.6, max_tokens: 500, model: claude-3-5-sonnet-20241022]
 AGI is a type of AI that can perform...
-
+```
 
 * [Web API Mode]
 
 **NOTE**: Only one **web server** can be active at a time, since all use **port 8000** by default.
 
-### ❯ Example (Python LlamaIndex)
+### ❯ Example (Python)
 
 ```bash
+python langchain/llm_gateway.py web
 python llamaindex/llm_gateway.py web
 ```
 
-### ❯ Example (JavaScript LangChain)
+### ❯ Example (JavaScript)
 
 ```bash
 node langchain/llm_gateway.js web
+node llamaindex/llm_gateway.js web
 ```
 
 ### ❯ Endpoints
