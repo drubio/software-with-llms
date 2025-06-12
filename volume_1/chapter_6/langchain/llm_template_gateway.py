@@ -87,12 +87,14 @@ class LangChainLLMManager(BaseLLMManager):
                 1. A direct factual answer (if possible)
                 2. A summary of what the question is about
                 3. Relevant keywords
+                4. A distilled answer (short phrase or value-only form of the answer)
 
                 Respond in the following JSON format:
                 {{
                     "answer": "...",
                     "summary": "...",
-                    "keywords": ["...", "..."]
+                    "keywords": ["...", "..."],
+                    "distilled": "..."
                 }}
 
                 Topic: {topic}
@@ -183,12 +185,15 @@ class LangChainLLMManager(BaseLLMManager):
                 answer = parsed.get("answer", content)
                 summary = parsed.get("summary")
                 keywords = parsed.get("keywords", [])
+                distilled = parsed.get("distilled")
 
                 combined = answer
+                if distilled:
+                    combined += f"\nDistilled: {distilled}"
                 if summary:
-                    combined += f"\n📘 Summary: {summary}"
+                    combined += f"\nSummary: {summary}"
                 if keywords:
-                    combined += f"\n🔑 Keywords: {', '.join(keywords)}"
+                    combined += f"\nKeywords: {', '.join(keywords)}"
                 content = combined
 
             turns.append({"role": role, "content": content})
