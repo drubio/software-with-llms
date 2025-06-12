@@ -29,7 +29,8 @@ class LlamaIndexLLMManager(BaseLLMManager):
         super().__init__("LlamaIndex+History")
 
     def _session_file_path(self, provider: str, session_id: str) -> Path:
-        path = Path("sessions")
+        base = Path(__file__).resolve().parent
+        path = base / "sessions"
         path.mkdir(parents=True, exist_ok=True)
         return path / f"{provider}__{session_id}.json"
 

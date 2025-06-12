@@ -68,9 +68,7 @@ class LangChainLLMManager(BaseLLMManager):
     def _get_history(self, provider: str, session_id: str) -> FileChatMessageHistory:
         key = (provider, session_id)
         if key not in self.histories:
-            path = Path("sessions")
-            path.mkdir(parents=True, exist_ok=True)
-            file_path = path / f"{provider}__{session_id}.json"
+            file_path = self._session_file_path(provider, session_id)
             self.histories[key] = FileChatMessageHistory(file_path=str(file_path))
         return self.histories[key]
 
@@ -88,6 +86,12 @@ class LangChainLLMManager(BaseLLMManager):
             )
             self.chains[key] = chain
         return self.chains[key]
+
+    def _session_file_path(self, provider: str, session_id: str) -> Path:
+        base = Path(__file__).resolve().parent
+        path = base / "sessions"
+        path.mkdir(parents=True, exist_ok=True)
+        return path / f"{provider}__{session_id}.json"
 
     def ask_question(self, topic: str, provider: str = None, template: str = "{topic}",
                      max_tokens: int = 1000, temperature: float = 0.7,
@@ -148,9 +152,8 @@ class LangChainLLMManager(BaseLLMManager):
             key = (provider, session_id)
             self.chains.pop(key, None)
             self.histories.pop(key, None)
-            path = Path("sessions") / f"{provider}__{session_id}.json"
-            if path.exists():
-                path.unlink()
+            path = self._session_file_path(provider, session_id)
+            path.unlink(missing_ok=True)
             removed.append(key)
 
         elif provider:
@@ -158,9 +161,7 @@ class LangChainLLMManager(BaseLLMManager):
                 if key[0] == provider:
                     self.chains.pop(key, None)
                     self.histories.pop(key, None)
-                    path = Path("sessions") / f"{key[0]}__{key[1]}.json"
-                    if path.exists():
-                        path.unlink()
+                    self._session_file_path(*key).unlink(missing_ok=True)
                     removed.append(key)
 
         elif session_id:
@@ -168,16 +169,12 @@ class LangChainLLMManager(BaseLLMManager):
                 if key[1] == session_id:
                     self.chains.pop(key, None)
                     self.histories.pop(key, None)
-                    path = Path("sessions") / f"{key[0]}__{key[1]}.json"
-                    if path.exists():
-                        path.unlink()
+                    self._session_file_path(*key).unlink(missing_ok=True)
                     removed.append(key)
 
         else:
             for key in list(self.histories):
-                path = Path("sessions") / f"{key[0]}__{key[1]}.json"
-                if path.exists():
-                    path.unlink()
+                self._session_file_path(*key).unlink(missing_ok=True)
             self.chains.clear()
             self.histories.clear()
             removed = ["ALL"]
