@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+
 # Provider configurations
 PROVIDERS = {
     "anthropic": {
@@ -108,7 +109,11 @@ def display_provider_response(provider: str, response: Dict[str, Any], framework
         print(f"[{', '.join(config_parts)}]")
     
     if response.get("success"):
-        print(response.get("response", "No response"))
+        raw = response.get("response", "")
+        if hasattr(raw, "content"):  # Structured message (like AIMessage)
+            print(str(raw.content))
+        else:
+            print(str(raw))
     else:
         print(f"Error: {response.get('error', 'Unknown error')}")
     print("=" * 60)
@@ -209,79 +214,119 @@ class BaseLLMManager:
         }
 
 def interactive_cli(manager: BaseLLMManager):
-    """Generic interactive CLI that works with any LLM manager"""
+    """Generic interactive CLI with optional memory support"""
+
     print("=" * 60)
-    print(f"LLM Tester - {manager.framework} Framework")
+    print(f"LLM Gateway - {manager.framework} Framework")
     print("=" * 60)
-    
+
     manager.display_initialization_status()
-    
     available_providers = manager.get_available_providers()
-    
+
     if not available_providers:
         print("No providers available. Check your .env file.")
         return
-    
-    question = input("What topic do you want to ask about? ")
+
     temperature, max_tokens = get_user_parameters()
-    
     print(f"\nUsing temperature: {temperature}, max tokens: {max_tokens}")
-    
-    if len(available_providers) > 1:
-        print(f"\nAvailable providers: {', '.join([get_display_name(p) for p in available_providers])}")
-        query_all = input("Query ALL providers or select one? (all/one): ").lower()
-        
-        if query_all in ["all", "a", ""]:
-            print("\n" + "="*50)
-            print(f"{manager.framework.upper()} API CALLS - QUERYING ALL PROVIDERS")
-            print("="*50)
-            
-            results = manager.query_all_providers(
-                topic=question, 
-                temperature=temperature, 
-                max_tokens=max_tokens
-            )
-            
-            if results["success"]:
-                for provider, response in results["responses"].items():
-                    display_provider_response(provider, response, manager.framework)
-            else:
-                print(f"Error: {results['error']}")
-            
-            save_option = input("\nSave results? (y/n): ").lower()
-            if save_option in ["y", "yes"]:
-                filename = format_filename(question, manager.framework.lower())
-                save_response_to_file(results, filename)
-        else:
-            provider_names = [get_display_name(p) for p in available_providers]
-            choice_idx = get_user_choice(provider_names, "Select a provider:")
-            provider = available_providers[choice_idx]
-            
-            print(f"\n" + "="*50)
-            print(f"{manager.framework.upper()} API CALL - {get_display_name(provider).upper()}")
-            print("="*50)
-            
-            result = manager.ask_question(
-                topic=question, 
-                provider=provider, 
-                temperature=temperature, 
-                max_tokens=max_tokens
-            )
-            display_provider_response(provider, result, manager.framework)
-    else:
-        provider = available_providers[0]
-        print(f"\nUsing only available provider: {get_display_name(provider)}")
-        
-        print(f"\n" + "="*50)
-        print(f"{manager.framework.upper()} API CALL - {get_display_name(provider).upper()}")
-        print("="*50)
-        
-        result = manager.ask_question(
-            topic=question, 
-            provider=provider, 
-            temperature=temperature, 
+
+    print(f"\nAvailable providers: {', '.join([get_display_name(p) for p in available_providers])}")
+    query_all = input("Query ALL providers or select one? (all/one): ").strip().lower()
+
+    # Determine memory compatibility once
+    memory_supported = (
+        hasattr(manager, "memory_enabled") and
+        getattr(manager, "memory_enabled") is True and
+        hasattr(manager, "ask_question") and
+        "session_id" in manager.ask_question.__code__.co_varnames
+    )
+
+    if query_all in ["all", "a", ""]:
+        question = input("Enter your question: ")
+        print("\n" + "=" * 50)
+        print(f"{manager.framework.upper()} API CALLS - QUERYING ALL PROVIDERS")
+        print("=" * 50)
+
+        results = manager.query_all_providers(
+            topic=question,
+            temperature=temperature,
             max_tokens=max_tokens
         )
-        display_provider_response(provider, result, manager.framework)
-    
-    print(f"\nThank you for using the {manager.framework} LLM Tester!")
+
+        if results["success"]:
+            for provider, response in results["responses"].items():
+                display_provider_response(provider, response, manager.framework)
+        else:
+            print(f"Error: {results['error']}")
+
+        save_option = input("\nSave results? (y/n): ").lower()
+        if save_option in ["y", "yes"]:
+            filename = format_filename(question, manager.framework.lower())
+            save_response_to_file(results, filename)
+
+    else:
+        # SINGLE PROVIDER INTERACTIVE MODE
+        provider_names = [get_display_name(p) for p in available_providers]
+        choice_idx = get_user_choice(provider_names, "Select a provider:")
+        provider = available_providers[choice_idx]
+
+        print(f"\nUsing provider: {get_display_name(provider)}")
+
+        session_id = "default"
+        if memory_supported:
+            session_id_input = input("Enter memory session ID (default: 'default'): ").strip()
+            if session_id_input:
+                session_id = session_id_input
+            print(f"Using memory session: {session_id}")
+
+        print("\n" + "=" * 50)
+        print(f"{manager.framework.upper()} INTERACTIVE MODE - {get_display_name(provider).upper()}")
+        print("=" * 50)
+
+        while True:
+            if memory_supported:
+                user_input = input("\nAsk a question (or 'history', 'clear', 'exit'): ").strip()
+            else:
+                user_input = input("\nAsk a question (or 'exit'): ").strip()
+                
+            if user_input.lower() in ["exit", "quit"]:
+                print("Exiting.")
+                break
+
+            elif user_input.lower() == "history":
+                if memory_supported and hasattr(manager, "get_history"):
+                    history = manager.get_history(provider, session_id)
+                    print(f"\n🧠 Memory for {get_display_name(provider)} (session: {session_id}):")
+                    for turn in history["turns"]:
+                        print(f"[{turn['role'].capitalize()}] {turn['content']}")
+                    if not history["turns"]:
+                        print("No memory yet.")
+                else:
+                    print("⚠️ This manager does not support memory history.")
+
+            elif user_input.lower() == "clear":
+                if memory_supported and hasattr(manager, "reset_memory"):
+                    result = manager.reset_memory(provider, session_id)
+                    print(f"✅ Memory cleared for session '{session_id}'")
+                else:
+                    print("⚠️ This manager does not support memory reset.")
+
+            else:
+                if memory_supported:
+                    result = manager.ask_question(
+                        topic=user_input,
+                        provider=provider,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        session_id=session_id
+                    )
+                else:
+                    result = manager.ask_question(
+                        topic=user_input,
+                        provider=provider,
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                display_provider_response(provider, result, manager.framework)
+
+    print(f"\nThank you for using the {manager.framework} LLM Gateway!")

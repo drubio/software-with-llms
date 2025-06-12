@@ -1,8 +1,3 @@
-"""
-LLM Tester - LangChain Framework Implementation
-ONLY LangChain-specific logic, inherits all generic functionality
-"""
-
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
