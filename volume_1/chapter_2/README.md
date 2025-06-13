@@ -7,7 +7,7 @@ This chapter shows how to load API keys and other environment variables using `.
 ```
 env.js                # JavaScript example using dotenv
 env.py                # Python example using python-dotenv
-rename\_to\_.env.txt    # Sample .env file — rename before use
+rename_to_.env.txt    # Sample .env file—rename before use
 requirements.txt      # Python dependency list
 package.json          # JavaScript dependencies with ES module enabled
 ````
@@ -24,7 +24,7 @@ Rename the provided sample file so it's recognized as a real environment config 
 mv rename_to_.env.txt .env
 ````
 
-Edit the `.env` content to reflect your own LLM API keys
+Edit the `.env` key values to reflect your own LLM API keys
 
 Example `.env` file:
 
@@ -93,5 +93,5 @@ console.log(apiKey);
 
 ## Summary
 
-Both the Python and JavaScript examples use standard libraries to safely load environment variables from a local `.env` file — a best practice for working with API keys.
+Both the Python and JavaScript examples use standard libraries to safely load environment variables from a local `.env` file—a best practice for working with API keys.
 
