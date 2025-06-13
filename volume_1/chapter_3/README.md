@@ -12,7 +12,7 @@ Each subfolder reflects an LLM provider and contains:
 The scripts generate and test completions using the nursery rhyme:  
 `"Twinkle, Twinkle, Little"`, to verify LLM functionality and output quality.
 
-**NOTE**: (An `.env`- file with the corresponding API key must also be generated)
+**NOTE**: An `.env`- file with the corresponding API key must also be generated.
 ---
 
 
