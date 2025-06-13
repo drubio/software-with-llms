@@ -12,7 +12,7 @@ Each subfolder reflects an LLM provider and contains:
 The scripts generate and test completions using the nursery rhyme:  
 `"Twinkle, Twinkle, Little"`, to verify LLM functionality and output quality.
 
-**NOTE**: An `.env`- file with the corresponding API key must also be generated.
+*NOTE*: An `.env`- file with the corresponding API key must also be generated.
 ---
 
 
@@ -81,7 +81,7 @@ Each script:
 * Loads its API key from `.env`
 * Sends the prompt `"Twinkle, Twinkle, Little"` to the model
 * Outputs the model's prediction
+* Vlidates the correct API integration with each provider
+* Requires the minimum code requirements for Python and JavaScript.
 
-Each script validates the correct API integration with each provider, outputs fidelity across models using the same prompt and requires the minimum setup requirements for Python or JavaScript.
-
-This setup also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
+This setup in each script also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
