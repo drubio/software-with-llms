@@ -10,10 +10,9 @@ Each subfolder reflects an LLM provider and contains:
 - The necessary `package.json` / `requirements.txt` for dependencies
 
 The scripts generate and test completions using the nursery rhyme:  
-`"Twinkle, Twinkle, Little"`,  
-to verify LLM functionality and output quality.
+`"Twinkle, Twinkle, Little"`, to verify LLM functionality and output quality.
 
-**NOTE**: An `.env`- file with the corresponding API key must also be generated
+**NOTE**: (An `.env`- file with the corresponding API key must also be generated)
 ---
 
 
@@ -80,10 +79,9 @@ For each provider (`anthropic`, `openai`, `google`, `xai`):
 Each script:
 
 * Loads its API key from `.env`
-* Sends a prompt beginning with `"Twinkle, Twinkle, Little"`
+* Sends the prompt `"Twinkle, Twinkle, Little"` to the model
 * Outputs the model's prediction
-* May include logging of token usage, latency, or model metadata
 
-Each script validate the correct API integration with each provider, output fidelity across models using the same prompt and minimal setup requirements for developers using Python or JavaScript.
+Each script validates the correct API integration with each provider, outputs fidelity across models using the same prompt and requires the minimum setup requirements for Python or JavaScript.
 
-This setup also gives you a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
+This setup also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
