@@ -81,7 +81,6 @@ Each script:
 * Loads its API key from `.env`
 * Sends the prompt `"Twinkle, Twinkle, Little"` to the model
 * Outputs the model's prediction
-* Vlidates the correct API integration with each provider
 * Requires the minimum code requirements for Python and JavaScript.
 
 This setup in each script also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
