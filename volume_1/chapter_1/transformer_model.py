@@ -166,7 +166,7 @@ def train_model(model, loader, epochs=5, device=None):
     
     return model
 
-def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=1.0, max_words=5):
+def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=0.2, max_words=5):
     """Generate text predictions using the transformer model."""
     # Use regular greedy/sampling generation
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -248,13 +248,13 @@ def main():
     """Entry point when script is run directly."""
     parser = argparse.ArgumentParser(description="Transformer Language Model")
     parser.add_argument("prompt", help="Input prompt to complete")
-    parser.add_argument("--nursery", action="store_true", help="Use nursery rhyme corpus")
+    parser.add_argument("--shakespeare", action="store_true", help="Use shakespeare corpus")
     parser.add_argument("--context", type=int, default=15, help="Context window size")
     parser.add_argument("--topk", type=int, default=5, help="Show top-k predictions")
-    parser.add_argument("--temperature", type=float, default=1.0, help="Sampling temperature")
+    parser.add_argument("--temperature", type=float, default=0.2, help="Sampling temperature")
     parser.add_argument("--maxwords", type=int, default=5, help="Max number of predicted words")
     parser.add_argument("--batch_size", type=int, default=32, help="Training batch size")
-    parser.add_argument("--epochs", type=int, default=5, help="Training epochs")
+    parser.add_argument("--epochs", type=int, default=10, help="Training epochs")
     parser.add_argument("--force_train", action="store_true", help="Force retraining even if model exists")
     parser.add_argument("--d_model", type=int, default=128, help="Model dimension")
     parser.add_argument("--nhead", type=int, default=4, help="Number of attention heads")
@@ -262,7 +262,7 @@ def main():
     args = parser.parse_args()
 
     # Process arguments
-    corpus_type = "nursery" if args.nursery else "shakespeare"
+    corpus_type = "shakespeare" if args.shakespeare else "nursery"
     
     # Load corpus and tokenize
     corpus_text = utils.load_corpus(corpus_type)
@@ -276,8 +276,8 @@ def main():
     if vocab_file.exists() and not args.force_train:
         vocab = utils.load_vocab(vocab_file)
     else:
-        special_tokens = ['<pad>', '<unk>', '<cls>', '<sep>']
-        vocab = utils.build_vocab(tokens, min_freq=2, special_tokens=special_tokens)
+        tokens = ['<bos>'] + tokens
+        vocab = utils.build_vocab(tokens, min_freq=2)
         utils.save_vocab(vocab, vocab_file)
 
     # Create mapping from indices to words

@@ -61,20 +61,18 @@ def load_corpus(corpus_type, use_cache=True):
                 response = requests.get(url, timeout=30)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, "html.parser")
-                text = soup.get_text(separator=' ', strip=True)
-                start = text.find("Mother Goose")
-                end = text.find("End of the Project Gutenberg")
-                if start != -1 and end != -1:
-                    text = text[start:end]
-                lines = text.splitlines()
-                cleaned_lines = [
-                    line for line in lines
-                    if 'project gutenberg' not in line.lower()
-                    and 'musicxml' not in line.lower()
-                    and 'http' not in line.lower()
-                    and len(line.strip()) > 0
-                ]
-                full_text += ' ' + ' '.join(cleaned_lines)
+                if "gutenberg.org" in url:
+                    poem_divs = soup.find_all('div', class_='poem1')
+                    for div in poem_divs:
+                        for br in div.find_all('br'):
+                            br.replace_with('\n')
+                        full_text += '<bos>' + div.get_text(separator='\n',strip=True)
+                elif "poetryfoundation.org" in url:
+                    poem_divs = soup.find_all('div', class_='poem-body')
+                    for div in poem_divs:
+                        for br in div.find_all('br'):
+                            br.replace_with('\n')
+                        full_text += '<bos>' + div.get_text(separator='\n',strip=True)
             text = full_text.strip()
         elif corpus_type == "shakespeare":
             url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"

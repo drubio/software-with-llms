@@ -50,13 +50,13 @@ def main():
     """Entry point when script is run directly."""
     parser = argparse.ArgumentParser(description="N-gram Language Model")
     parser.add_argument("prompt", help="Input prompt to complete")
-    parser.add_argument("--nursery", action="store_true", help="Use nursery rhyme corpus")
+    parser.add_argument("--shakespeare", action="store_true", help="Use shakespeare corpus")
     parser.add_argument("--ngram", type=int, default=4, help="Size of n-gram (default=4)")
     parser.add_argument("--topk", type=int, default=5, help="Number of top predictions to show (defauklt=5)")
     args = parser.parse_args()
     
     # Process arguments
-    corpus_type = "nursery" if args.nursery else "shakespeare"
+    corpus_type = "shakespeare" if args.shakespeare else "nursery"
     
     # Load corpus
     corpus_text = utils.load_corpus(corpus_type)
