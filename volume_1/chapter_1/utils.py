@@ -65,14 +65,16 @@ def load_corpus(corpus_type, use_cache=True):
                     poem_divs = soup.find_all('div', class_='poem1')
                     for div in poem_divs:
                         for br in div.find_all('br'):
-                            br.replace_with('\n')
-                        full_text += '<bos>' + div.get_text(separator='\n',strip=True)
+                            br.replace_with(' ')
+                        full_text += '\n\n' + div.get_text(separator=' ',strip=True)
                 elif "poetryfoundation.org" in url:
                     poem_divs = soup.find_all('div', class_='poem-body')
                     for div in poem_divs:
                         for br in div.find_all('br'):
-                            br.replace_with('\n')
-                        full_text += '<bos>' + div.get_text(separator='\n',strip=True)
+                            br.replace_with(' ')
+                        full_text += '\n\n' + div.get_text(separator=' ',strip=True)
+            # Reinforce url content with inline version
+            full_text += """\nTwinkle, twinkle, little star, How I wonder what you are! Up above the world so high, Like a diamond in the sky."""
             text = full_text.strip()
         elif corpus_type == "shakespeare":
             url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
