@@ -42,7 +42,7 @@ class LSTMModel(nn.Module):
         return self.linear(out[:, -1, :])
 
 
-def train_model(model, loader, epochs=5, device=None):
+def train_model(model, loader, epochs=2, device=None):
     """Train the LSTM model."""
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -78,7 +78,7 @@ def train_model(model, loader, epochs=5, device=None):
     return model
 
 
-def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=0.2, max_words=1):
+def predict_next(model, vocab, idx_to_word, prompt, context, top_k=5, temperature=0.7, max_words=1):
     """Generate text predictions using the trained LSTM model."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
@@ -160,10 +160,10 @@ def main():
     parser.add_argument("--shakespeare", action="store_true", help="Use shakespeare corpus")
     parser.add_argument("--context", type=int, default=15, help="Context window size")
     parser.add_argument("--topk", type=int, default=5, help="Show top-k predictions")
-    parser.add_argument("--temperature", type=float, default=0.2, help="Sampling temperature")
+    parser.add_argument("--temperature", type=float, default=0.7, help="Sampling temperature")
     parser.add_argument("--maxwords", type=int, default=5, help="Max number of predicted words")
     parser.add_argument("--batch_size", type=int, default=32, help="Training batch size")
-    parser.add_argument("--epochs", type=int, default=10, help="Training epochs")
+    parser.add_argument("--epochs", type=int, default=2, help="Training epochs")
     parser.add_argument("--force_train", action="store_true", help="Force retraining even if model exists")
     args = parser.parse_args()
 
