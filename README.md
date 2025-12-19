@@ -8,16 +8,16 @@ This three-part series offers a structured, hands-on approach to build software 
 
 ## 📘 Volumes
 
-### [Essential LLM Applications – Fundamentals, APIs, and UIs](https://www.amazon.com/dp/B0F5WXXM59) _(Volume 1)_
+### [Essential LLM Applications – Fundamentals, APIs and UIs](https://www.amazon.com/dp/B0F5WXXM59) _(Volume 1)_
 
-Covers how LLMs work, their evolution, and how to access them via APIs (OpenAI, Anthropic, Google, xAI). Includes building a complete app using:
+Covers how LLMs work, their evolution and how to access them via APIs (OpenAI, Anthropic, Google, xAI). Includes building a complete app using:
 
 - Step-by-step examples for developers new to LLMs
 - LangChain and LlamaIndex for basic chats with LLMs
 - Assistant UI components and vanilla React
 
 
-### Scale LLM Applications – Agents, Routing, and Infrastructure _(Volume 2)_ _(coming soon)_
+### Scale LLM Applications – Agents, Routing and Infrastructure _(Volume 2)_ _(coming soon)_
 
 Explores:
 
@@ -25,7 +25,7 @@ Explores:
 - Managing model infrastructure with LiteLLM and OpenRouter
 - Designing scalable, fault-tolerant systems with context and robustness in mind
 
-### Advanced LLM Applications – RAG, Personalization, and MCP _(Volume 3)_ _(coming soon)_
+### Advanced LLM Applications – RAG, Personalization and MCP _(Volume 3)_ _(coming soon)_
 
 Focuses on:
 
@@ -39,7 +39,7 @@ Focuses on:
 
 This repository includes companion code and examples for all three volumes. Code is organized to match the topics covered in each volume. Each folder corresponds to a chapter described in the book.
 
-You're welcome to explore, modify, and adapt the examples for your own projects.
+You're welcome to explore, modify and adapt the examples for your own projects.
 
 ---
 
