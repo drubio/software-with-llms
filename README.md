@@ -2,7 +2,7 @@
 
 *A practical guide to modern AI integration*
 
-This three-part series offers a structured, hands-on approach to build software applications that work with large language models (LLMs). Whether you're a developer, engineer, or technical lead, this guide helps you design and implement AI-powered software systems with clarity and practicality.
+This three-part series offers a structured, hands-on approach to building software applications that work with large language models (LLMs). Whether you're a developer, engineer, or technical lead, this guide helps you design and implement AI-powered software systems with clarity and practicality.
 
 ---
 
