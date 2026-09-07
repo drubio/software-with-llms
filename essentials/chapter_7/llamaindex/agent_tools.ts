@@ -1,10 +1,10 @@
 /**
- * Agent Tools - LlamaIndex JS with Wikipedia.
+ * Agent Tools - LlamaIndex TypeScript with Wikipedia.
  */
 
-import { LlamaIndexLLMManager as Chapter6LlamaIndexManager } from '../../chapter_6/llamaindex/agent_memory_retrieval.js';
-import { interactiveCli, normalizeResponseText, printCliHelp } from '../../../shared/essentials/utils.mjs';
-import { buildToolsPrompt, runTool } from '../tools.js';
+import { LlamaIndexLLMManager as Chapter6LlamaIndexManager } from '../../chapter_6/llamaindex/agent_memory_retrieval.ts';
+import { interactiveCli, normalizeResponseText, printCliHelp } from '../../../shared/essentials/utils.ts';
+import { buildToolsPrompt, runTool } from '../tools.ts';
 
 const TOOLS_TEMPLATE = `You are a helpful assistant with access to external tools.
 
@@ -39,7 +39,7 @@ Return strict JSON:
 class LlamaIndexLLMManager extends Chapter6LlamaIndexManager {
     constructor(memoryEnabled = true, retrievalK = 4) {
         super(memoryEnabled, retrievalK);
-        this.framework = 'LlamaIndex Tools JS';
+        this.framework = 'LlamaIndex Tools TypeScript';
     }
 
     _extractJsonObject(raw) {
@@ -298,7 +298,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LlamaIndexLLMManager(true));
     } else {
         const manager = new LlamaIndexLLMManager(true);

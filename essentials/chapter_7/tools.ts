@@ -1,4 +1,4 @@
-/** Chapter 7 tool utilities (JavaScript / Node). */
+/** Chapter 7 tool utilities (TypeScript / Node). */
 
 'use strict';
 

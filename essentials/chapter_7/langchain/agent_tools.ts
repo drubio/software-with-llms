@@ -1,10 +1,10 @@
 /**
- * Agent Tools - LangChain JS with Wikipedia.
+ * Agent Tools - LangChain TypeScript with Wikipedia.
  */
 
-import { LangChainLLMManager as Chapter6LangChainManager } from '../../chapter_6/langchain/agent_memory_retrieval.js';
-import { interactiveCli, normalizeResponseText, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.mjs';
-import { buildToolsPrompt, runTool } from '../tools.js';
+import { LangChainLLMManager as Chapter6LangChainManager } from '../../chapter_6/langchain/agent_memory_retrieval.ts';
+import { interactiveCli, normalizeResponseText, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
+import { buildToolsPrompt, runTool } from '../tools.ts';
 
 const TOOLS_TEMPLATE = `You are a helpful assistant with access to external tools.
 
@@ -41,7 +41,7 @@ Return strict JSON:
 class LangChainLLMManager extends Chapter6LangChainManager {
     constructor(memoryEnabled = true, retrievalK = 4) {
         super(memoryEnabled, retrievalK);
-        this.framework = 'LangChain Tools JS';
+        this.framework = 'LangChain Tools TypeScript';
     }
 
     _extractJsonObject(raw) {
@@ -296,7 +296,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LangChainLLMManager(true));
     } else {
         const manager = new LangChainLLMManager(true);

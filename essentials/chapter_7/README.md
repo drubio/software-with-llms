@@ -2,7 +2,7 @@
 
 This chapter extends Chapter 6's features with **tool calling**.
 
-It provides cross-framework (**LangChain**, **LlamaIndex**) and dual-language (**Python**, **JavaScript**) implementations that:
+It provides cross-framework (**LangChain**, **LlamaIndex**) and dual-language (**Python**, **TypeScript**) implementations that:
 
 - Reuse Chapter 4 base provider/client setup and shared CLI/Web helpers
 - Reuse Chapter 5 memory + persistence base behavior through Chapter 6 managers
@@ -19,23 +19,23 @@ Just like earlier chapters, each script can run in:
 chapter_7/
 ├── langchain/
 │   ├── agent_tools.py
-│   └── agent_tools.js
+│   └── agent_tools.ts
 ├── llamaindex/
 │   ├── agent_tools.py
-│   └── agent_tools.js
+│   └── agent_tools.ts
 ├── tools.py
-├── tools.js
-├── requirements.txt
+├── tools.ts
 ├── package.json
+├── tsconfig.json
 └── README.md
 ```
 
 ## Script matrix
 
-| Framework | Python | JavaScript |
+| Framework | Python | TypeScript |
 |---|---|---|
-| **LangChain** | `langchain/agent_tools.py` | `langchain/agent_tools.js` |
-| **LlamaIndex** | `llamaindex/agent_tools.py` | `llamaindex/agent_tools.js` |
+| **LangChain** | `langchain/agent_tools.py` | `langchain/agent_tools.ts` |
+| **LlamaIndex** | `llamaindex/agent_tools.py` | `llamaindex/agent_tools.ts` |
 
 ## Dependencies and environment
 
@@ -44,9 +44,9 @@ Chapter 7 builds on Chapter 4/5/6:
 - Chapter 4 shared utilities and web server helpers
 - Chapter 5 memory + persistence foundations
 - Chapter 6 retrieval-memory manager classes
-- Chapter 7 tool utilities (`tools.py`, `tools.js`)
+- Chapter 7 tool utilities (`tools.py`, `tools.ts`)
 
-Set API keys in `volume_1/chapter_4/.env`:
+Set API keys in `shared/.env`:
 
 ```env
 OPENAI_API_KEY=your-openai-key
@@ -55,23 +55,15 @@ GOOGLE_API_KEY=your-google-key
 XAI_API_KEY=your-xai-key
 ```
 
-Install dependencies:
-
-### Python
+Install the repository-level Node dependencies for the TypeScript examples:
 
 ```bash
-pip install -r requirements.txt
-```
-
-### JavaScript
-
-```bash
-npm install
+npm run install:root
 ```
 
 ## Usage
 
-Run commands from `volume_1/chapter_7`.
+Run commands from `essentials/chapter_7`.
 
 ### Command line mode
 
@@ -82,11 +74,11 @@ python langchain/agent_tools.py
 python llamaindex/agent_tools.py
 ```
 
-#### JavaScript
+#### TypeScript
 
 ```bash
-node langchain/agent_tools.js
-node llamaindex/agent_tools.js
+npx tsx langchain/agent_tools.ts
+npx tsx llamaindex/agent_tools.ts
 ```
 
 ### Web API mode
@@ -94,8 +86,8 @@ node llamaindex/agent_tools.js
 ```bash
 python langchain/agent_tools.py web
 python llamaindex/agent_tools.py web
-node langchain/agent_tools.js web
-node llamaindex/agent_tools.js web
+npx tsx langchain/agent_tools.ts web
+npx tsx llamaindex/agent_tools.ts web
 ```
 
 ## Tool orchestration pattern
@@ -126,15 +118,15 @@ All Chapter 7 agents follow the same two-step JSON tool loop:
 
 ## Included tool utilities
 
-Current tools shared by Python/JS utilities:
+Current tools shared by Python/TypeScript utilities:
 
 - `get_wikipedia_evidence_pack` — fetch Wikipedia summary + references + Wikimedia media
 
 Both utility modules expose:
 
 - tool definitions metadata (`TOOL_DEFINITIONS`)
-- a dispatcher (`run_tool` in Python / `runTool` in JS)
-- a prompt helper (`build_tools_prompt` in Python / `buildToolsPrompt` in JS)
+- a dispatcher (`run_tool` in Python / `runTool` in TypeScript)
+- a prompt helper (`build_tools_prompt` in Python / `buildToolsPrompt` in TypeScript)
 
 ## Notes
 
