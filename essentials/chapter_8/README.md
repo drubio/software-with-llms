@@ -1,6 +1,6 @@
 # Chapter 8 — Unified LLM UI App (Streaming + Standard Response Modes)
 
-This chapter is the final UI showcase for Volume 1.
+This chapter is the final UI showcase for the Agent Essentials book.
 
 It contains **one Next.js app** that demonstrates the same backend-powered LLM interactions through **4 different UI component approaches**:
 
@@ -34,7 +34,7 @@ The UI checks backend status and capabilities to decide whether streaming is ava
 ## Architecture overview
 
 ### Frontend (this chapter)
-- Next.js app in `volume_1/chapter_8`
+- Next.js app in `essentials/chapter_8`
 - Main UI in `app/page.tsx`
 - LlamaIndex adapter route in `app/api/llamaindex-chat/route.ts`
 
@@ -51,9 +51,7 @@ This UI expects a backend on `http://localhost:8000` with:
   - `GET /history`
   - `POST /reset-memory`
 
-Streaming helpers were added at:
-- `volume_1/chapter_4/stream.py`
-- `volume_1/chapter_4/stream.js`
+Streaming helpers are provided by the shared Python and TypeScript web modules used by the backend chapters.
 
 ---
 
@@ -72,12 +70,12 @@ Streaming helpers were added at:
 From a backend chapter that uses the shared web API (for example Chapter 7):
 
 ```bash
-cd volume_1/chapter_7
+cd essentials/chapter_7
 # Python example
 python langchain/llm_tools.py web
 
-# or JS example
-node langchain/llm_tools.js web
+# or TypeScript example
+npx tsx langchain/agent_tools.ts web
 ```
 
 You should have an API available at `http://localhost:8000`.
@@ -85,7 +83,7 @@ You should have an API available at `http://localhost:8000`.
 ## 2) Install frontend deps
 
 ```bash
-cd volume_1/chapter_8
+cd essentials/chapter_8
 npm install
 ```
 

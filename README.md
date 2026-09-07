@@ -29,7 +29,7 @@ You're welcome to explore, modify and adapt the examples for your own projects.
 This repository root includes two dependency manifests:
 
 - `requirements.txt` contains the common Python dependencies used by shared helpers and by chapters that rely on this code.
-- `package.json` contains the common TypeScript/JavaScript dependencies used by shared helpers and by chapters that rely on this code.
+- `package.json` contains the common TypeScript dependencies used by shared helpers and by chapters that rely on this code.
 
 ---
 
