@@ -1,12 +1,13 @@
 # Direct LLM API access: Anthropic, OpenAI, Google, xAI, DeepSeek
 
-This chapter demonstrates how to access the major LLM providers—Anthropic, OpenAI, Google, xAI and DeepSeek—using their in-house APIs and minimal working scripts in both Python and JavaScript.
+This chapter demonstrates how to access the major LLM providers—Anthropic, OpenAI, Google, xAI and DeepSeek—using their in-house APIs and minimal working scripts in both Python and TypeScript.
 
 ## Project Contents
 Each subfolder reflects an LLM provider and contains:
 
 - A `nursery.py` script (Python)
-- A `nursery.js` script (JavaScript)
+- A `nursery.ts` script (TypeScript)
+- A `tsconfig.json` TypeScript compiler configuration
 - The necessary `package.json` / `requirements.txt` for dependencies
 
 The scripts generate and test completions using the nursery rhyme:  
@@ -53,7 +54,7 @@ NOTE: This chapter does **not** use the repository-level shared libraries in `sh
 
 ---
 
-### > Example (JavaScript)
+### > Example (TypeScript)
 
 ### Step 1. Navigate into the provider folder:
 
@@ -74,7 +75,7 @@ NOTE: This chapter does **not** use the repository-level shared libraries in `sh
 ### Step 4. Run the script:
 
    ```bash
-   node nursery.js
+   npm start
    ```
 
 ---
@@ -86,6 +87,6 @@ Each script:
 * Loads its provider LLM  API key from `.env`
 * Sends the prompt `"Twinkle, Twinkle, Little"` to the model
 * Outputs the model's prediction
-* Uses the minimum code requirements for Python and JavaScript.
+* Uses the minimum code requirements for Python and TypeScript.
 
 This setup for each provider also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.

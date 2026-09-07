@@ -11,4 +11,7 @@ const response = await anthropic.messages.create({
   messages: [{ role: "user", content: "Twinkle, Twinkle, Little" }],
 });
 
-console.log(response.content[0].text);
+const content = response.content[0];
+if (content.type === "text") {
+  console.log(content.text);
+}
