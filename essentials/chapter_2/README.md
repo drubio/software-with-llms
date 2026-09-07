@@ -1,15 +1,16 @@
 # Environment Variable Setup with `.env` files
 
-This chapter shows how to load API keys and other environment variables using `.env` files, in both Python and JavaScript.
+This chapter shows how to load API keys and other environment variables using `.env` files, in both Python and TypeScript.
 
 ## Project Contents
 
 ```
-env.js                # JavaScript example using dotenv
+env.ts                # TypeScript example using dotenv
 env.py                # Python example using python-dotenv
 rename_to_.env.txt    # Sample .env file—rename before use
 requirements.txt      # Python dependency list
-package.json          # JavaScript dependencies with ES module enabled
+package.json          # TypeScript dependencies and scripts
+tsconfig.json         # TypeScript compiler configuration
 ````
 
 ---
@@ -69,7 +70,7 @@ print(api_key)
 
 ---
 
-### ❯ Example (JavaScript)
+### ❯ Example (TypeScript)
 
 **Install dependencies:**
 
@@ -82,12 +83,12 @@ NOTE: This chapter does **not** use the repository-level shared libraries in `sh
 **Run the script:**
 
 ```bash
-node env.js
+npm start
 ```
 
 This script loads `.env`, fetches the `OPENAI_API_KEY`, and prints it:
 
-```js
+```ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -98,4 +99,4 @@ console.log(apiKey);
 
 ## Summary
 
-Both the Python and JavaScript examples use standard libraries to safely load environment variables from a local `.env` file, which is a best practice for working with API keys.
+Both the Python and TypeScript examples use standard libraries to safely load environment variables from a local `.env` file, which is a best practice for working with API keys.
