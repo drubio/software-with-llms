@@ -78,6 +78,12 @@ print(api_key)
 npm install
 ```
 
+The `allowScripts` entry in `package.json` explicitly permits esbuild's
+installation script. `tsx` uses esbuild to run this TypeScript example, and
+recent npm versions warn when a dependency's install script has not been
+reviewed and approved. Keeping the approval in the project manifest prevents
+that warning without disabling npm's install-script protection globally.
+
 NOTE: This chapter does **not** use the repository-level shared libraries in `shared/`
 
 **Run the script:**
