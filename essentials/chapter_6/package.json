@@ -1,9 +1,10 @@
 {
-  "name": "chapter-6-llm-memory-retrieval-js",
+  "name": "chapter-6-llm-memory-retrieval-ts",
   "private": true,
   "type": "module",
   "scripts": {
-    "install:root": "npm --prefix ../.. install"
+    "install:root": "npm --prefix ../.. install",
+    "typecheck": "tsc -p tsconfig.json"
   },
-  "description": "Uses shared dependencies installed from the repository root package.json"
+  "description": "TypeScript examples using shared dependencies installed from the repository root package.json"
 }

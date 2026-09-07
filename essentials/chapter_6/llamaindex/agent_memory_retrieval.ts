@@ -1,9 +1,9 @@
 /**
- * Agent Selective Memory Retrieval - LangChain JS with BM25.
+ * Agent Selective Memory Retrieval - LangChain TypeScript with BM25.
  */
 
-import { LlamaIndexLLMManager as Chapter5StructuredLlamaIndexManager, STRUCTURED_TEMPLATE } from '../../chapter_5/llamaindex/agent_structured_output.js';
-import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.mjs';
+import { LlamaIndexLLMManager as Chapter5StructuredLlamaIndexManager, STRUCTURED_TEMPLATE } from '../../chapter_5/llamaindex/agent_structured_output.ts';
+import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
 import { getEncoding } from 'js-tiktoken';
 import { BM25 } from 'fast-bm25';
 
@@ -11,7 +11,7 @@ class LlamaIndexLLMManager extends Chapter5StructuredLlamaIndexManager {
     constructor(memoryEnabled = true, retrievalK = 4) {
         // Disable inherited full-memory chat engine replay. Chapter 6 builds retrieval prompts directly.
         super(false);
-        this.framework = 'LlamaIndex Memory+Retrieval JS';
+        this.framework = 'LlamaIndex Memory+Retrieval TypeScript';
         this.retrievalMemoryEnabled = memoryEnabled;
         this.retrievalK = Math.max(1, retrievalK);
         // Provider-agnostic tokenizer baseline (GPT-2 BPE), without model/provider mapping.
@@ -276,7 +276,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LlamaIndexLLMManager(true));
     } else {
         const manager = new LlamaIndexLLMManager(true);

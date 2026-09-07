@@ -4,7 +4,7 @@
 
 It includes:
 - **LangChain** and **LlamaIndex** implementations
-- **Python** and **JavaScript** versions for each framework
+- **Python** and **TypeScript** versions for each framework
 - CLI + Web modes (same as earlier chapters)
 
 ## What's new vs earlier chapters
@@ -17,10 +17,10 @@ It includes:
 - Stops replaying the entire conversation history into each prompt.
 - Uses BM25 retrieval to select top-`k` relevant snippets for prompt injection.
 - Combines BM25 with lexical-overlap gating, then falls back to overlap-only matching when BM25 is weak.
-- Uses framework/native tokenizers for token-count estimates in retrieval metadata (`retrieved_messages_count`, token savings estimates, etc.); JS uses a provider-agnostic BPE baseline tokenizer.
+- Uses framework/native tokenizers for token-count estimates in retrieval metadata (`retrieved_messages_count`, token savings estimates, etc.); TypeScript uses a provider-agnostic BPE baseline tokenizer.
 - Keeps persistent session memory behavior inherited from Chapter 5.
 
-### Robust structured-response behavior (Py + JS)
+### Robust structured-response behavior (Py + TS)
 - If the CLI passes `'{topic}'`, Chapter 6 retrieval scripts normalize to `STRUCTURED_TEMPLATE` so structured JSON instructions are still used.
 - If a provider returns non-JSON text, parsers now fall back to a safe structured payload instead of hard-failing.
 
@@ -30,19 +30,21 @@ It includes:
 chapter_6/
 ├── langchain/
 │   ├── agent_memory_retrieval.py
-│   └── agent_memory_retrieval.js
+│   └── agent_memory_retrieval.ts
 ├── llamaindex/
 │   ├── agent_memory_retrieval.py
-│   └── agent_memory_retrieval.js
+│   └── agent_memory_retrieval.ts
+├── package.json
+├── tsconfig.json
 └── README.md
 ```
 
 ## Script matrix
 
-| Framework | Python | JavaScript |
+| Framework | Python | TypeScript |
 |---|---|---|
-| LangChain | `langchain/agent_memory_retrieval.py` | `langchain/agent_memory_retrieval.js` |
-| LlamaIndex | `llamaindex/agent_memory_retrieval.py` | `llamaindex/agent_memory_retrieval.js` |
+| LangChain | `langchain/agent_memory_retrieval.py` | `langchain/agent_memory_retrieval.ts` |
+| LlamaIndex | `llamaindex/agent_memory_retrieval.py` | `llamaindex/agent_memory_retrieval.ts` |
 
 ## Dependencies and environment
 
@@ -62,7 +64,7 @@ DEEPSEEK_API_KEY=your-deepseek-key
 
 ## Usage
 
-Run from `volume_1/chapter_6`.
+Run from `essentials/chapter_6`. Install the repository-level Node dependencies with `npm run install:root` before running TypeScript examples.
 
 ### CLI mode
 
@@ -73,11 +75,11 @@ python langchain/agent_memory_retrieval.py
 python llamaindex/agent_memory_retrieval.py
 ```
 
-#### JavaScript
+#### TypeScript
 
 ```bash
-node langchain/agent_memory_retrieval.js
-node llamaindex/agent_memory_retrieval.js
+npx tsx langchain/agent_memory_retrieval.ts
+npx tsx llamaindex/agent_memory_retrieval.ts
 ```
 
 ### Web mode
@@ -85,8 +87,8 @@ node llamaindex/agent_memory_retrieval.js
 ```bash
 python langchain/agent_memory_retrieval.py web
 python llamaindex/agent_memory_retrieval.py web
-node langchain/agent_memory_retrieval.js web
-node llamaindex/agent_memory_retrieval.js web
+npx tsx langchain/agent_memory_retrieval.ts web
+npx tsx llamaindex/agent_memory_retrieval.ts web
 ```
 
 ## Retrieval metadata

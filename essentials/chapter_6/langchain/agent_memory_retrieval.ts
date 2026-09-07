@@ -1,9 +1,9 @@
 /**
- * Agent Selective Memory Retrieval - LangChain JS with BM25.
+ * Agent Selective Memory Retrieval - LangChain TypeScript with BM25.
  */
 
-import { LangChainLLMManager as Chapter5StructuredLangChainManager, STRUCTURED_TEMPLATE } from '../../chapter_5/langchain/agent_structured_output.js';
-import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.mjs';
+import { LangChainLLMManager as Chapter5StructuredLangChainManager, STRUCTURED_TEMPLATE } from '../../chapter_5/langchain/agent_structured_output.ts';
+import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
 import { Document } from '@langchain/core/documents';
 import { BM25Retriever } from '@langchain/community/retrievers/bm25';
 import { getEncoding } from 'js-tiktoken';
@@ -12,7 +12,7 @@ class LangChainLLMManager extends Chapter5StructuredLangChainManager {
     constructor(memoryEnabled = true, retrievalK = 4) {
         // Disable inherited full-history replay chain. Chapter 6 builds retrieval prompts directly.
         super(false);
-        this.framework = 'LangChain Memory+Retrieval JS';
+        this.framework = 'LangChain Memory+Retrieval TypeScript';
         this.retrievalMemoryEnabled = memoryEnabled;
         this.retrievalK = Math.max(1, retrievalK);
         // Provider-agnostic tokenizer baseline (GPT-2 BPE), without model/provider mapping.
@@ -243,7 +243,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LangChainLLMManager(true));
     } else {
         const manager = new LangChainLLMManager(true);
