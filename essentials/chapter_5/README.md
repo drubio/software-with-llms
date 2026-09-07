@@ -1,11 +1,11 @@
 # Agent application with memory and persistent chat for multiple LLMs
 
--This chapter extends Chapter 4's Agent application with:
+This chapter extends Chapter 4's Agent application with:
 
 1. **Memory and persistence**
 2. **Memory, persistence and structured output parsing**
 
-Both variations are available across **LangChain** and **LlamaIndex**, in **Python** and **JavaScript**, as well as CLI and web API modes.
+Both variations are available across **LangChain** and **LlamaIndex**, in **Python** and **TypeScript**, as well as CLI and web API modes.
 
 ## Project structure
 
@@ -13,40 +13,42 @@ Both variations are available across **LangChain** and **LlamaIndex**, in **Pyth
 chapter_5/
 ├── langchain/
 │   ├── agent_memory_persist.py
-│   ├── agent_memory_persist.js
+│   ├── agent_memory_persist.ts
 │   ├── agent_structured_output.py
-│   └── agent_structured_output.js
+│   └── agent_structured_output.ts
 ├── llamaindex/
 │   ├── agent_memory_persist.py
-│   ├── agent_memory_persist.js
+│   ├── agent_memory_persist.ts
 │   ├── agent_structured_output.py
-│   └── agent_structured_output.js
+│   └── agent_structured_output.ts
+├── package.json
+├── tsconfig.json
 └── README.md
 ```
 
 ## Script matrix
 
-| Framework | Memory and Persistence(Python) | Memory and Persistence memory (JavaScript) | Structured Output (Python) | Structured Output (JavaScript) |
+| Framework | Memory and Persistence (Python) | Memory and Persistence (TypeScript) | Structured Output (Python) | Structured Output (TypeScript) |
 |---|---|---|---|---|
-| **LangChain** | `langchain/agent_memory_persist.py` | `langchain/agent_memory_persist.js` | `langchain/agent_structured_output.py` | `langchain/agent_structured_output.js` |
-| **LlamaIndex** | `llamaindex/agent_memory_persist.py` | `llamaindex/agent_memory_persist.js` | `llamaindex/agent_structured_output.py` | `llamaindex/agent_structured_output.js` |
+| **LangChain** | `langchain/agent_memory_persist.py` | `langchain/agent_memory_persist.ts` | `langchain/agent_structured_output.py` | `langchain/agent_structured_output.ts` |
+| **LlamaIndex** | `llamaindex/agent_memory_persist.py` | `llamaindex/agent_memory_persist.ts` | `llamaindex/agent_structured_output.py` | `llamaindex/agent_structured_output.ts` |
 
 ## Dependencies and environment
 
 Chapter 5 reuses Chapter 4 framework managers plus centralized shared components:
-- `chapter_4/langchain/agent_app.py` / `chapter_4/langchain/agent_app.js`
-- `chapter_4/llamaindex/agent_app.py` / `chapter_4/llamaindex/agent_app.js`
-- `shared/llm_models.py` / `shared/llm_models.mjs`
-- `shared/utils.py` / `shared/utils.mjs` and `shared/web.py` / `shared/web.mjs`
-- `shared/essentials/utils.py` / `shared/essentials/utils.mjs`
-- `shared/essentials/web.py` / `shared/essentials/web.mjs`
+- `chapter_4/langchain/agent_app.py` / `chapter_4/langchain/agent_app.ts`
+- `chapter_4/llamaindex/agent_app.py` / `chapter_4/llamaindex/agent_app.ts`
+- `shared/llm_models.py` / `shared/llm_models.ts`
+- `shared/utils.py` / `shared/utils.ts` and `shared/web.py` / `shared/web.ts`
+- `shared/essentials/utils.py` / `shared/essentials/utils.ts`
+- `shared/essentials/web.py` / `shared/essentials/web.ts`
 
 Ensure you install the dependencies for your language of choice located in the root level folder—requirements.txt or package.json—in addition to declaring LLM API keys in the shared/.env file. See the shared/ folder README.md for additional details.
 
 
 ## Usage
 
-Run commands from `volume_1/chapter_5`.
+Run commands from `essentials/chapter_5`. Install the repository-level Node dependencies with `npm run install:root` before running TypeScript examples.
 
 ### Command line mode
 
@@ -59,20 +61,20 @@ python llamaindex/agent_memory_persist.py
 python llamaindex/agent_structured_output.py
 ```
 
-#### JavaScript
+#### TypeScript
 
 ```bash
-node langchain/agent_memory_persist.js
-node langchain/agent_structured_output.js
-node llamaindex/agent_memory_persist.js
-node llamaindex/agent_structured_output.js
+npx tsx langchain/agent_memory_persist.ts
+npx tsx langchain/agent_structured_output.ts
+npx tsx llamaindex/agent_memory_persist.ts
+npx tsx llamaindex/agent_structured_output.ts
 ```
 
 ### Web API mode
 
 ```bash
 python langchain/agent_memory_persist.py web
-node llamaindex/agent_structured_output.js web
+npx tsx llamaindex/agent_structured_output.ts web
 ```
 
 ## Incremental learning goal

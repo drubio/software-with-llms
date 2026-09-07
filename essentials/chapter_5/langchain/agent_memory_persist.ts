@@ -1,5 +1,5 @@
 /**
- * LLM Memory Gateway - LangChain JS with persistent session memory.
+ * LLM Memory Gateway - LangChain TypeScript with persistent session memory.
  */
 
 import fs from 'fs';
@@ -10,8 +10,8 @@ import { FileSystemChatMessageHistory } from '@langchain/community/stores/messag
 import { mapChatMessagesToStoredMessages } from '@langchain/core/messages';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
-import { LangChainLLMManager as Chapter4LangChainManager } from '../../chapter_4/langchain/agent_app.js';
-import { interactiveCli, printCliHelp } from '../../../shared/essentials/utils.mjs';
+import { LangChainLLMManager as Chapter4LangChainManager } from '../../chapter_4/langchain/agent_app.ts';
+import { interactiveCli, printCliHelp } from '../../../shared/essentials/utils.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,7 +62,7 @@ function patchFileSystemChatMessageHistory(history) {
 class LangChainLLMManager extends Chapter4LangChainManager {
     constructor(memoryEnabled = true) {
         super();
-        this.framework = 'LangChain Memory+Persistence JS';
+        this.framework = 'LangChain Memory+Persistence TypeScript';
         this.memoryEnabled = memoryEnabled;
         this.histories = new Map();
         this.chains = new Map();
@@ -252,7 +252,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LangChainLLMManager(true));
     } else {
         const manager = new LangChainLLMManager(true);

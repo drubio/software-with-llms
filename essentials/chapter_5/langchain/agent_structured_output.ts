@@ -1,9 +1,9 @@
 /**
- * Agent Memory Structured Gateway - LangChain JS with structured JSON responses.
+ * Agent Memory Structured Gateway - LangChain TypeScript with structured JSON responses.
  */
 
-import { LangChainLLMManager as Chapter5LangChainManager } from './agent_memory_persist.js';
-import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.mjs';
+import { LangChainLLMManager as Chapter5LangChainManager } from './agent_memory_persist.ts';
+import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
 
 export const STRUCTURED_TEMPLATE = `Given the topic below, provide:
 
@@ -29,7 +29,7 @@ Topic: {topic}`;
 class LangChainLLMManager extends Chapter5LangChainManager {
     constructor(memoryEnabled = true) {
         super(memoryEnabled);
-        this.framework = 'LangChain Structured Output JS';
+        this.framework = 'LangChain Structured Output TypeScript';
     }
 
     _extractObjectFromText(rawResponse, key) {
@@ -153,7 +153,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LangChainLLMManager(true));
     } else {
         const manager = new LangChainLLMManager(true);

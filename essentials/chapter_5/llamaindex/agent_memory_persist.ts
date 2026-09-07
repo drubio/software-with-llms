@@ -1,5 +1,5 @@
 /**
- * Agent Memory Gateway - LlamaIndex JS with persistent session memory.
+ * Agent Memory Gateway - LlamaIndex TypeScript with persistent session memory.
  */
 
 import fs from 'fs';
@@ -9,8 +9,8 @@ import { fileURLToPath } from 'url';
 import { SimpleChatEngine } from '@llamaindex/core/chat-engine';
 import { Memory } from '@llamaindex/core/memory';
 import { SimpleChatStore } from '@llamaindex/core/storage/chat-store';
-import { LlamaIndexLLMManager as Chapter4LlamaIndexManager } from '../../chapter_4/llamaindex/agent_app.js';
-import { interactiveCli, printCliHelp } from '../../../shared/essentials/utils.mjs';
+import { LlamaIndexLLMManager as Chapter4LlamaIndexManager } from '../../chapter_4/llamaindex/agent_app.ts';
+import { interactiveCli, printCliHelp } from '../../../shared/essentials/utils.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +55,7 @@ function normalizePersistedMessages(messages) {
 class LlamaIndexLLMManager extends Chapter4LlamaIndexManager {
     constructor(memoryEnabled = true) {
         super();
-        this.framework = 'LlamaIndex Memory+Persistence JS';
+        this.framework = 'LlamaIndex Memory+Persistence TypeScript';
         this.memoryEnabled = memoryEnabled;
         this.memories = new Map();
         this.chatEngines = new Map();
@@ -226,7 +226,7 @@ async function main() {
         return;
     }
     if (args.includes('web')) {
-        const { runWebServer } = await import('../../../shared/essentials/web.mjs');
+        const { runWebServer } = await import('../../../shared/essentials/web.ts');
         await runWebServer(() => new LlamaIndexLLMManager(true));
     } else {
         const manager = new LlamaIndexLLMManager(true);
