@@ -4,6 +4,9 @@
     "start": "tsx nursery.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },    
   "dependencies": {
     "dotenv": "^16.6.1",
     "openai": "^6.32.0"

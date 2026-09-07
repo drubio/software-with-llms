@@ -4,6 +4,9 @@
     "start": "tsx nursery.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "dotenv": "^16.6.1"

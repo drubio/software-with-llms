@@ -68,6 +68,11 @@ NOTE: This chapter does **not** use the repository-level shared libraries in `sh
    npm install
    ```
 
+Each provider's `package.json` explicitly allows esbuild's reviewed installation
+script. The Google example also allows the reviewed install scripts for
+`@google/genai` and its `protobufjs` dependency. Recent npm versions otherwise
+warn that these scripts have not been approved.
+
 NOTE: This chapter does **not** use the repository-level shared libraries in `shared/`
 
 ### Step 3. Create an `.env` file with the correct LLM API keys like it was done in the last chapter (or described above).
