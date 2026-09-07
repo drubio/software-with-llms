@@ -1,46 +1,69 @@
 /**
- * LLM application to chat with multiple LLMs - LangChain JavaScript framework implementation.
+ * LLM application to chat with multiple LLMs - LlamaIndex TypeScript framework implementation.
  */
 
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
     BaseLLMManager,
-    createLangChainModel,
+    createLlamaIndexModel,
     interactiveCli,
     printCliHelp,
-} from '../../../shared/utils.mjs';
+} from '../../../shared/utils.ts';
 
-class LangChainLLMManager extends BaseLLMManager {
+type LlamaIndexContentBlock = {
+    type?: string;
+    text?: string;
+};
+
+type LlamaIndexResponse = {
+    message?: {
+        content?: string | LlamaIndexContentBlock[];
+    } | unknown;
+};
+
+class LlamaIndexLLMManager extends BaseLLMManager {
     constructor() {
-        super('LangChain JS');
+        super('LlamaIndex TypeScript');
     }
 
-    async _testProvider(provider) {
+    async _testProvider(provider: string): Promise<void> {
         await this._createModel(this.providerModelIdentifier(provider), 0.7, 1000);
     }
 
-    _createModel(selectedModel, temperature, maxTokens) {
-        return createLangChainModel(selectedModel, {
+    _createModel(selectedModel: string, temperature: number, maxTokens: number) {
+        return createLlamaIndexModel(selectedModel, {
             temperature,
             maxTokens,
         });
     }
 
-    _buildMessages(prompt) {
-        return [
-            new SystemMessage('You are a helpful AI assistant.'),
-            new HumanMessage(prompt),
-        ];
+    _resolveProvider(provider: string): string | null {
+        return this.resolveModelIdentifier(provider);
     }
 
-    _extractText(provider, result) {
-        if (provider === 'google' && typeof result?.text !== 'undefined') {
-            return String(result.text);
+    _extractText(result: LlamaIndexResponse): string {
+        const message = result?.message;
+        const content = message && typeof message === 'object' && 'content' in message
+            ? message.content
+            : undefined;
+        if (typeof content === 'string') {
+            return content;
         }
-        return String(result?.content ?? '');
+        if (Array.isArray(content)) {
+            return content
+                .filter((block) => block?.type === 'text' && typeof block?.text === 'string')
+                .map((block) => block.text)
+                .join('\n');
+        }
+        return String(content ?? message ?? result ?? '');
     }
 
-    async askQuestion(topic, provider = null, template = '{topic}', maxTokens = 1000, temperature = 0.7) {
+    async askQuestion(
+        topic: string,
+        provider: string | null = null,
+        template = '{topic}',
+        maxTokens = 1000,
+        temperature = 0.7,
+    ) {
         const prompt = template.replace('{topic}', topic);
         const modelConfig = this.resolveModelConfig(provider);
 
@@ -57,8 +80,9 @@ class LangChainLLMManager extends BaseLLMManager {
 
         try {
             const model = this._createModel(modelConfig.name, temperature, maxTokens);
-            const messages = this._buildMessages(prompt);
-            const response = this._extractText(modelConfig.provider, await model.invoke(messages));
+            const messages = [{ role: 'user', content: prompt }];
+            const response = this._extractText(await model.chat({ messages }));
+
             return {
                 success: true,
                 provider: modelConfig.provider,
@@ -69,14 +93,14 @@ class LangChainLLMManager extends BaseLLMManager {
                 temperature,
                 maxTokens,
             };
-        } catch (error) {
+        } catch (error: unknown) {
             return {
                 success: false,
                 provider: modelConfig.provider,
                 model: modelConfig.model,
                 modelIdentifier: modelConfig.name,
                 prompt,
-                error: error.message,
+                error: error instanceof Error ? error.message : String(error),
                 response: null,
                 temperature,
                 maxTokens,
@@ -94,21 +118,21 @@ async function main() {
 
     if (args.includes('web')) {
         try {
-            const { runWebServer } = await import('../../../shared/essentials/web.mjs');
-            await runWebServer(() => new LangChainLLMManager());
+            const { runWebServer } = await import('../../../shared/essentials/web.ts');
+            await runWebServer(() => new LlamaIndexLLMManager());
         } catch (error) {
             console.error('Error: shared web API not found or Express not installed.');
             console.error('Install Express: npm install express cors');
             process.exit(1);
         }
     } else {
-        const manager = new LangChainLLMManager();
+        const manager = new LlamaIndexLLMManager();
         await manager._checkProviders();
         await interactiveCli(manager);
     }
 }
 
-export { LangChainLLMManager };
+export { LlamaIndexLLMManager };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     main().catch(console.error);

@@ -1,6 +1,6 @@
 # Agent application to chat with multiple LLMs
 
-This chapter provides a cross-framework (LangChain, LlamaIndex), dual-language (Python, JavaScript) agent application to interact with multiple LLMs (GPT, Claude, Gemini, Grok)
+This chapter provides a cross-framework (LangChain, LlamaIndex), dual-language (Python, TypeScript) agent application to interact with multiple LLMs (GPT, Claude, Gemini, Grok).
 
 It can be run in two forms:
 - In **command line** mode, with output sent to a console.
@@ -11,40 +11,38 @@ It can be run in two forms:
 chapter_4/
 ├── langchain/
 │   ├── agent_app.py
-│   └── agent_app.js
+│   └── agent_app.ts
 ├── llamaindex/
 │   ├── agent_app.py
-│   └── agent_app.js
+│   └── agent_app.ts
 │
 shared/
-├── llm_models.py / llm_models.mjs
-├── utils.py / utils.mjs
-├── web.py / web.mjs
+├── llm_models.py / llm_models.ts
+├── utils.py / utils.ts
+├── web.py / web.ts
 ├── essentials/
-│   ├── utils.py / utils.mjs
-│   └── web.py / web.mjs
+│   ├── utils.py / utils.ts
+│   └── web.py / web.ts
 ├── .env
 
-````
+```
 
 You choose what framework to run by choosing the script language and framework subfolder:
 
-------------------------------------------------------------------------------------
-| Framework       | Python                          | JavaScript                   |
-|-----------------|---------------------------------|------------------------------|
-| **LangChain**   | `langchain/agent_app.py`          | `langchain/agent_app.js`       |
-| **LlamaIndex**  | `llamaindex/agent_app.py`         | `llamaindex/agent_app.js`      |
-------------------------------------------------------------------------------------
+| Framework      | Python                    | TypeScript                   |
+| -------------- | ------------------------- | ---------------------------- |
+| **LangChain**  | `langchain/agent_app.py`  | `langchain/agent_app.ts`     |
+| **LlamaIndex** | `llamaindex/agent_app.py` | `llamaindex/agent_app.ts`    |
 
 These exercises use reusable modules in `shared/` and `shared/essentials/`; 
 
 The shared modules are split by series and book:
 
-- `llm_models.py` / `llm_models.mjs` — LLM model configurations used across the book series
-- `utils.py` / `utils.mjs` — Utilities used across the book series, including provider/model lookup, response normalization, structured JSON parsing, logging and simple CLI helpers.
-- `web.py` / `web.mjs` — Web logic used across the book series, including app/server setup, manager construction, SSE formatting, chunk streaming and capability checks.
-- `essentials/utils.py` / `essentials/utils.mjs` — Utilities for this book 'Agent Essentials' , includes provider-manager base class and memory-aware interactive CLI flow.
-- `essentials/web.py` / `essentials/web.mjs` — Web logic for this book 'Agent Essentials', includes status/providers/capabilities/query/query-stream/history/reset-memory endpoints.
+- `llm_models.py` / `llm_models.ts` — LLM model configurations used across the book series
+- `utils.py` / `utils.ts` — Utilities used across the book series, including provider/model lookup, response normalization, structured JSON parsing, logging and simple CLI helpers.
+- `web.py` / `web.ts` — Web logic used across the book series, including app/server setup, manager construction, SSE formatting, chunk streaming and capability checks.
+- `essentials/utils.py` / `essentials/utils.ts` — Utilities for this book 'Agent Essentials' , includes provider-manager base class and memory-aware interactive CLI flow.
+- `essentials/web.py` / `essentials/web.ts` — Web logic for this book 'Agent Essentials', includes status/providers/capabilities/query/query-stream/history/reset-memory endpoints.
 - `.env` — Environment file with LLM API keys
 
 
@@ -65,11 +63,11 @@ python langchain/agent_app.py
 python llamaindex/agent_app.py
 ```
 
-### ❯ Example (JavaScript)
+### ❯ Example (TypeScript)
 
 ```bash
-node langchain/agent_app.js
-node llamaindex/agent_app.js
+npx tsx langchain/agent_app.ts
+npx tsx llamaindex/agent_app.ts
 ```
 
 ### ❯ Sample Session
@@ -102,11 +100,11 @@ python langchain/agent_app.py web
 python llamaindex/agent_app.py web
 ```
 
-### ❯ Example (JavaScript)
+### ❯ Example (TypeScript)
 
 ```bash
-node langchain/agent_app.js web
-node llamaindex/agent_app.js web
+npx tsx langchain/agent_app.ts web
+npx tsx llamaindex/agent_app.ts web
 ```
 
 ### ❯ Endpoints
@@ -121,7 +119,7 @@ node llamaindex/agent_app.js web
 
 ## API Examples (`curl`)
 
-> Output is identical between Python and JS backends.
+> Output is identical between Python and TypeScript backends.
 
 ---
 
