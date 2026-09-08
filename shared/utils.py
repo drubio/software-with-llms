@@ -271,6 +271,14 @@ def interactive_cli(manager: BaseLLMManager, model_identifier: Optional[str] = N
 
 
 def normalize_response_text(payload: Any) -> str:
+    """Extract text from chat messages and OpenAI Responses API payloads.
+
+    Newer reasoning models may return typed content blocks (including nested
+    ``output -> message -> content -> output_text`` blocks) instead of a single
+    string.  Keep this normalization at the shared boundary so callers never
+    stringify those objects into Python reprs that cannot subsequently be
+    parsed as JSON.
+    """
     if payload is None:
         return ""
     if isinstance(payload, str):
@@ -299,14 +307,33 @@ def normalize_response_text(payload: Any) -> str:
             pass
         return payload
 
-    if isinstance(payload, dict):
-        for key in ("content", "text", "message", "answer", "final_answer", "distilled", "summary", "response"):
-            value = payload.get(key)
-            if isinstance(value, str) and value.strip():
-                return value
+    if isinstance(payload, (list, tuple)):
+        parts = [normalize_response_text(item).strip() for item in payload]
+        return "\n".join(part for part in parts if part)
 
-    if hasattr(payload, "content") and isinstance(payload.content, str):
-        return payload.content
+    text_keys = (
+        "output_text", "content", "text", "message", "answer", "final_answer",
+        "distilled", "summary", "response", "output",
+    )
+    if isinstance(payload, dict):
+        for key in text_keys:
+            if key not in payload:
+                continue
+            value = payload[key]
+            if isinstance(value, (str, dict, list, tuple)):
+                normalized = normalize_response_text(value).strip()
+                if normalized:
+                    return normalized
+        if payload.get("type") in {"reasoning", "function_call", "custom_tool_call"}:
+            return ""
+        return json.dumps(payload, ensure_ascii=False, default=str)
+
+    for key in text_keys:
+        value = getattr(payload, key, None)
+        if isinstance(value, (str, dict, list, tuple)):
+            normalized = normalize_response_text(value).strip()
+            if normalized:
+                return normalized
     return str(payload)
 
 
@@ -470,7 +497,7 @@ def parse_structured_json_response(raw: Any) -> Dict[str, Any]:
         content = ""
     elif isinstance(raw, str):
         content = raw.strip()
-    elif isinstance(raw, dict):
+    elif isinstance(raw, dict) and ("tool_calls" in raw or "final_answer" in raw):
         content = json.dumps(raw, ensure_ascii=False)
     elif hasattr(raw, "content") and isinstance(raw.content, str):
         content = raw.content.strip()

@@ -14,7 +14,7 @@ if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
 from typing import Dict, Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from shared.utils import BaseLLMManager, interactive_cli
+from shared.utils import BaseLLMManager, interactive_cli, normalize_response_text
 from shared.utils import create_langchain_model
 
 
@@ -42,8 +42,8 @@ class LangChainLLMManager(BaseLLMManager):
 
     def _extract_text(self, provider: str, result) -> str:
         if provider == "google" and hasattr(result, "text"):
-            return str(result.text)
-        return str(result.content)
+            return normalize_response_text(result.text)
+        return normalize_response_text(getattr(result, "content", result))
 
     def ask_question(
         self,

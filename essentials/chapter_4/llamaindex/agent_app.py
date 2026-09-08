@@ -14,7 +14,7 @@ if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
 
 
 from llama_index.core.llms import ChatMessage
-from shared.utils import BaseLLMManager, interactive_cli
+from shared.utils import BaseLLMManager, interactive_cli, normalize_response_text
 from shared.utils import create_llamaindex_model
 
 
@@ -43,18 +43,7 @@ class LlamaIndexLLMManager(BaseLLMManager):
     @staticmethod
     def _extract_text(result) -> str:
         content = getattr(getattr(result, "message", None), "content", None)
-        if isinstance(content, str):
-            return content
-        if isinstance(content, list):
-            parts = []
-            for item in content:
-                if isinstance(item, dict) and item.get("type") == "text":
-                    parts.append(str(item.get("text", "")))
-                elif hasattr(item, "text"):
-                    parts.append(str(item.text))
-            if parts:
-                return "\n".join(parts)
-        return str(content if content is not None else result)
+        return normalize_response_text(content if content is not None else result)
 
     def ask_question(
         self,

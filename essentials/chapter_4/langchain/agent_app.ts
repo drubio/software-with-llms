@@ -7,6 +7,7 @@ import {
     BaseLLMManager,
     createLangChainModel,
     interactiveCli,
+    normalizeResponseText,
     printCliHelp,
 } from '../../../shared/utils.ts';
 
@@ -40,9 +41,9 @@ class LangChainLLMManager extends BaseLLMManager {
 
     _extractText(provider: string, result: LangChainResponse): string {
         if (provider === 'google' && typeof result?.text !== 'undefined') {
-            return String(result.text);
+            return normalizeResponseText(result.text);
         }
-        return String(result?.content ?? '');
+        return normalizeResponseText(result?.content ?? result);
     }
 
     async askQuestion(

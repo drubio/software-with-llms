@@ -280,11 +280,21 @@ export function normalizeResponseText(payload) {
     } catch {}
     return payload;
   }
+  if (Array.isArray(payload)) {
+    return payload.map((item) => normalizeResponseText(item).trim()).filter(Boolean).join("\n");
+  }
   if (typeof payload === "object") {
-    for (const key of ["content", "text", "message", "answer", "final_answer", "distilled", "summary", "response"]) {
+    // GPT-5 reasoning models can use the Responses API's nested
+    // output/message/content/output_text blocks rather than plain strings.
+    for (const key of ["output_text", "content", "text", "message", "answer", "final_answer", "distilled", "summary", "response", "output"]) {
       const value = payload[key];
       if (typeof value === "string" && value.trim()) return value;
+      if (value && typeof value === "object") {
+        const normalized = normalizeResponseText(value).trim();
+        if (normalized) return normalized;
+      }
     }
+    if (["reasoning", "function_call", "custom_tool_call"].includes(payload.type)) return "";
     return JSON.stringify(payload);
   }
   return String(payload);
@@ -468,7 +478,7 @@ export function parseStructuredJsonResponse(raw) {
   if (raw == null) content = "";
   else if (typeof raw === "string") content = raw.trim();
   else if (typeof raw === "object" && typeof raw.content === "string") content = raw.content.trim();
-  else if (typeof raw === "object" && !Array.isArray(raw)) content = JSON.stringify(raw);
+  else if (typeof raw === "object" && !Array.isArray(raw) && ("tool_calls" in raw || "final_answer" in raw)) content = JSON.stringify(raw);
   else content = normalizeResponseText(raw).trim();
   if (!content) throw new Error("Structured content is empty");
   const parts = content.match(/content=(['"])((?:\\.|(?!\1).)*)\1\s+additional_kwargs=/s);

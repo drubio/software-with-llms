@@ -6,6 +6,7 @@ import {
     BaseLLMManager,
     createLlamaIndexModel,
     interactiveCli,
+    normalizeResponseText,
     printCliHelp,
 } from '../../../shared/utils.ts';
 
@@ -45,16 +46,7 @@ class LlamaIndexLLMManager extends BaseLLMManager {
         const content = message && typeof message === 'object' && 'content' in message
             ? message.content
             : undefined;
-        if (typeof content === 'string') {
-            return content;
-        }
-        if (Array.isArray(content)) {
-            return content
-                .filter((block) => block?.type === 'text' && typeof block?.text === 'string')
-                .map((block) => block.text)
-                .join('\n');
-        }
-        return String(content ?? message ?? result ?? '');
+        return normalizeResponseText(content ?? message ?? result);
     }
 
     async askQuestion(
