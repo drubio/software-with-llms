@@ -14,8 +14,8 @@ Written for developers, engineers and technical builders who want to create mode
 Introduces the foundations of AI agent development, covering agent architectures, frontier LLM APIs, memory, retrieval, tools and user interfaces through practical examples using:
 
 - OpenAI, Anthropic, Google, xAI and DeepSeek
-- LangChain and LlamaIndex for building agent-powered applications
-- LangGraph SDK UI, LlamaIndex UI, Assistant UI and vanilla React
+- LangChain for building agent-powered applications
+- LangGraph SDK UI, Assistant UI and vanilla React
 
 
 ## About the Code

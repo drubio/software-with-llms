@@ -20,7 +20,7 @@ from langchain_community.chat_message_histories import FileChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-from essentials.chapter_4.langchain.agent_app import LangChainLLMManager as Chapter4LangChainManager
+from essentials.chapter_4.agent_app import LangChainLLMManager as Chapter4LangChainManager
 from shared.essentials.utils import interactive_cli
 
 

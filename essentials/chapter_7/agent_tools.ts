@@ -2,7 +2,7 @@
  * Agent Tools - LangChain TypeScript with Wikipedia.
  */
 
-import { LangChainLLMManager as Chapter6LangChainManager } from '../../chapter_6/langchain/agent_memory_retrieval.ts';
+import { LangChainLLMManager as Chapter6LangChainManager } from '../../chapter_6/agent_memory_retrieval.ts';
 import { interactiveCli, normalizeResponseText, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
 import { buildToolsPrompt, runTool } from '../tools.ts';
 

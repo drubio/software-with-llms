@@ -2,14 +2,13 @@
 
 This chapter is the final UI showcase for the Agent Essentials book.
 
-It contains **one Next.js app** that demonstrates the same backend-powered LLM interactions through **4 different UI component approaches**:
+It contains **one Next.js app** that demonstrates the same backend-powered LLM interactions through **3 different UI component approaches**:
 
 1. **LangChain Chat UI** (`@langchain/langgraph-sdk/react`)
-2. **LlamaIndex Chat UI** (`@llamaindex/chat-ui`)
-3. **Assistant UI** (`@assistant-ui/react`)
-4. **Custom Chat UI** (vanilla React implementation)
+2. **Assistant UI** (`@assistant-ui/react`)
+3. **Custom Chat UI** (vanilla React implementation)
 
-All four views share the same runtime settings sidebar and can talk to the earlier chapter backends.
+All three views share the same runtime settings sidebar and can talk to the earlier chapter backends.
 
 ---
 
@@ -36,7 +35,6 @@ The UI checks backend status and capabilities to decide whether streaming is ava
 ### Frontend (this chapter)
 - Next.js app in `essentials/chapter_8`
 - Main UI in `app/page.tsx`
-- LlamaIndex adapter route in `app/api/llamaindex-chat/route.ts`
 
 ### Backend (earlier chapters)
 This UI expects a backend on `http://localhost:8000` with:
@@ -72,10 +70,10 @@ From a backend chapter that uses the shared web API (for example Chapter 7):
 ```bash
 cd essentials/chapter_7
 # Python example
-python langchain/llm_tools.py web
+python agent_tools.py web
 
 # or TypeScript example
-npx tsx langchain/agent_tools.ts web
+npx tsx agent_tools.ts web
 ```
 
 You should have an API available at `http://localhost:8000`.
@@ -101,7 +99,7 @@ Open `http://localhost:3000`.
 
 ## Using the UI
 
-1. Pick one of the 4 framework tabs at the top.
+1. Pick one of the 3 UI tabs at the top.
 2. Open settings (gear icon).
 3. Configure:
    - Query Mode: single provider or all providers

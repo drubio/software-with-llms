@@ -1,4 +1,4 @@
-"""Agent Memory Structured Gateway - LlamaIndex with structured JSON responses."""
+"""Agent Memory Structured Gateway - LangChain with structured JSON responses."""
 
 import ast
 import os
@@ -16,7 +16,7 @@ if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
     sys.exit(0)
 
 
-from essentials.chapter_5.llamaindex.agent_memory_persist import LlamaIndexLLMManager as Chapter5LlamaIndexManager
+from essentials.chapter_5.agent_memory_persist import LangChainLLMManager as Chapter5LangChainManager
 from shared.essentials.utils import interactive_cli, parse_structured_json_response
 
 
@@ -44,12 +44,12 @@ Topic: {topic}
 """.strip()
 
 
-class LlamaIndexLLMManager(Chapter5LlamaIndexManager):
+class LangChainLLMManager(Chapter5LangChainManager):
     """Chapter 5 structured manager layered on persistent memory."""
 
     def __init__(self, memory_enabled: bool = True):
         super().__init__(memory_enabled=memory_enabled)
-        self.framework = "LlamaIndex Structured Output"
+        self.framework = "LangChain Structured Output"
 
     @staticmethod
     def _extract_dict_from_text(raw_response: str, key: str) -> Optional[Dict]:
@@ -181,9 +181,9 @@ def main():
     if "web" in args:
         from shared.essentials.web import run_web_server
 
-        run_web_server(lambda: LlamaIndexLLMManager(memory_enabled=True))
+        run_web_server(lambda: LangChainLLMManager(memory_enabled=True))
     else:
-        interactive_cli(LlamaIndexLLMManager(memory_enabled=True))
+        interactive_cli(LangChainLLMManager(memory_enabled=True))
 
 
 if __name__ == "__main__":

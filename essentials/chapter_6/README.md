@@ -1,109 +1,27 @@
 # Agent application with selective memory retrieval using BM25
 
-- This chapter upgrades the Chapter 5 memory agent from **full-history inclusion** to **retrieval prompt-based inclusion**.
-
-It includes:
-- **LangChain** and **LlamaIndex** implementations
-- **Python** and **TypeScript** versions for each framework
-- CLI + Web modes (same as earlier chapters)
-
-## What's new vs earlier chapters
-
-### vs Chapter 4 (basic application)
-- Adds conversational memory support through Chapter 5 managers.
-- Adds retrieval selection so prompts include only relevant prior turns.
-
-### vs Chapter 5 (memory + persistence + structured output)
-- Stops replaying the entire conversation history into each prompt.
-- Uses BM25 retrieval to select top-`k` relevant snippets for prompt injection.
-- Combines BM25 with lexical-overlap gating, then falls back to overlap-only matching when BM25 is weak.
-- Uses framework/native tokenizers for token-count estimates in retrieval metadata (`retrieved_messages_count`, token savings estimates, etc.); TypeScript uses a provider-agnostic BPE baseline tokenizer.
-- Keeps persistent session memory behavior inherited from Chapter 5.
-
-### Robust structured-response behavior (Py + TS)
-- If the CLI passes `'{topic}'`, Chapter 6 retrieval scripts normalize to `STRUCTURED_TEMPLATE` so structured JSON instructions are still used.
-- If a provider returns non-JSON text, parsers now fall back to a safe structured payload instead of hard-failing.
+This chapter upgrades the Chapter 5 memory agent from full-history inclusion to retrieval-based prompt inclusion. It uses BM25 and lexical-overlap gating to select relevant prior turns while preserving persistent session memory and structured responses.
 
 ## Project structure
 
 ```text
 chapter_6/
-├── langchain/
-│   ├── agent_memory_retrieval.py
-│   └── agent_memory_retrieval.ts
-├── llamaindex/
-│   ├── agent_memory_retrieval.py
-│   └── agent_memory_retrieval.ts
+├── agent_memory_retrieval.py
+├── agent_memory_retrieval.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-## Script matrix
-
-| Framework | Python | TypeScript |
-|---|---|---|
-| LangChain | `langchain/agent_memory_retrieval.py` | `langchain/agent_memory_retrieval.ts` |
-| LlamaIndex | `llamaindex/agent_memory_retrieval.py` | `llamaindex/agent_memory_retrieval.ts` |
-
-## Dependencies and environment
-
-Chapter 6 reuses:
-- Chapter 4 provider setup plus centralized shared CLI/web utilities and `.env`
-- Chapter 5 memory/session persistence foundations
-
-Set keys in `shared/.env`:
-
-```env
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
-GOOGLE_API_KEY=your-google-key
-XAI_API_KEY=your-xai-key
-DEEPSEEK_API_KEY=your-deepseek-key
-```
-
 ## Usage
 
-Run from `essentials/chapter_6`. Install the repository-level Node dependencies with `npm run install:root` before running TypeScript examples.
-
-### CLI mode
-
-#### Python
+Run commands from `essentials/chapter_6`.
 
 ```bash
-python langchain/agent_memory_retrieval.py
-python llamaindex/agent_memory_retrieval.py
+python agent_memory_retrieval.py
+npx tsx agent_memory_retrieval.ts
 ```
 
-#### TypeScript
+Add `web` to either command to run the web API variant.
 
-```bash
-npx tsx langchain/agent_memory_retrieval.ts
-npx tsx llamaindex/agent_memory_retrieval.ts
-```
-
-### Web mode
-
-```bash
-python langchain/agent_memory_retrieval.py web
-python llamaindex/agent_memory_retrieval.py web
-npx tsx langchain/agent_memory_retrieval.ts web
-npx tsx llamaindex/agent_memory_retrieval.ts web
-```
-
-## Retrieval metadata
-
-Successful responses include structured output plus retrieval diagnostics in metadata, including:
-- `history_messages_available`
-- `retrieved_messages_count`
-- `retrieved_messages`
-- `tokens_with_memory_retrieval`
-- `tokens_without_memory_retrieval`
-- `estimated_tokens_saved`
-- `estimated_token_reduction_percent`
-
-## Notes
-
-- Session memory remains isolated by provider + session id.
-- Retrieval memory still persists turns to session files through Chapter 5 persistence hooks.
-- Retrieval reduces prompt size pressure while preserving relevant context.
+Successful responses include retrieval diagnostics such as available and retrieved message counts, token estimates, and estimated token savings. Session memory remains isolated by provider and session ID.

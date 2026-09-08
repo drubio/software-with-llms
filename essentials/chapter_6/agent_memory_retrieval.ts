@@ -2,7 +2,7 @@
  * Agent Selective Memory Retrieval - LangChain TypeScript with BM25.
  */
 
-import { LangChainLLMManager as Chapter5StructuredLangChainManager, STRUCTURED_TEMPLATE } from '../../chapter_5/langchain/agent_structured_output.ts';
+import { LangChainLLMManager as Chapter5StructuredLangChainManager, STRUCTURED_TEMPLATE } from '../chapter_5/agent_structured_output.ts';
 import { interactiveCli, parseStructuredJsonResponse, printCliHelp } from '../../../shared/essentials/utils.ts';
 import { Document } from '@langchain/core/documents';
 import { BM25Retriever } from '@langchain/community/retrievers/bm25';

@@ -19,7 +19,7 @@ if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
     sys.exit(0)
 
 
-from essentials.chapter_6.langchain.agent_memory_retrieval import LangChainLLMManager as Chapter6LangChainManager
+from essentials.chapter_6.agent_memory_retrieval import LangChainLLMManager as Chapter6LangChainManager
 from essentials.chapter_7.tools import build_tools_prompt, run_tool
 from shared.essentials.utils import interactive_cli
 
