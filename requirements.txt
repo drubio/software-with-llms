@@ -11,17 +11,8 @@ langchain-google-genai==4.2.1
 langchain-xai==1.2.2
 langchain-deepseek==1.0.1
 
-# LlamaIndex framework
-llama-index==0.14.18
-llama-index-llms-anthropic==0.11.0
-llama-index-llms-openai==0.7.2
-llama-index-llms-openai-like==0.7.1
-llama-index-llms-google-genai==0.8.7
-
 # Ranking function for relevance of documents to a given search query
 rank-bm25==0.2.2
-# For LlamaIndex
-bm25s
 
 # Web 
 fastapi==0.115.6

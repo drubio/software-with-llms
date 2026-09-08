@@ -10,7 +10,7 @@ import { FileSystemChatMessageHistory } from '@langchain/community/stores/messag
 import { mapChatMessagesToStoredMessages } from '@langchain/core/messages';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
-import { LangChainLLMManager as Chapter4LangChainManager } from '../../chapter_4/langchain/agent_app.ts';
+import { LangChainLLMManager as Chapter4LangChainManager } from '../chapter_4/agent_app.ts';
 import { interactiveCli, printCliHelp } from '../../../shared/essentials/utils.ts';
 
 const __filename = fileURLToPath(import.meta.url);

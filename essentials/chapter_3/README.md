@@ -94,4 +94,4 @@ Each script:
 * Outputs the model's prediction
 * Uses the minimum code requirements for Python and TypeScript.
 
-This setup for each provider also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain or LlamaIndex.
+This setup for each provider also gives a clear baseline for model behavior across providers before using higher-level frameworks like LangChain.

@@ -20,7 +20,7 @@ from langchain_core.messages.utils import count_tokens_approximately
 from langchain_community.retrievers import BM25Retriever
 
 
-from essentials.chapter_5.langchain.agent_structured_output import STRUCTURED_TEMPLATE, LangChainLLMManager as Chapter5StructuredManager
+from essentials.chapter_5.agent_structured_output import STRUCTURED_TEMPLATE, LangChainLLMManager as Chapter5StructuredManager
 from shared.essentials.utils import interactive_cli, parse_structured_json_response
 
 
